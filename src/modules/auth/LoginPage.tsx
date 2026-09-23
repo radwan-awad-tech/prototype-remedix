@@ -78,7 +78,7 @@ export const LoginPage: React.FC = () => {
           onClick={() => setLanguage('en')}
           className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
             language === 'en' 
-              ? 'bg-brand-primary-end text-white shadow-md' 
+              ? 'bg-brand-deep-teal text-white shadow-sm'
               : 'bg-white text-text-secondary hover:bg-gray-50'
           }`}
         >
@@ -88,7 +88,7 @@ export const LoginPage: React.FC = () => {
           onClick={() => setLanguage('ar')}
           className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
             language === 'ar' 
-              ? 'bg-brand-primary-end text-white shadow-md' 
+              ? 'bg-brand-deep-teal text-white shadow-sm'
               : 'bg-white text-text-secondary hover:bg-gray-50'
           }`}
         >
@@ -103,17 +103,15 @@ export const LoginPage: React.FC = () => {
       >
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-primary text-white shadow-lg mb-4">
-            <ShieldCheck className="w-8 h-8" />
+          <div className="inline-flex items-center justify-center rounded-2xl border border-brand-light-gray bg-white px-8 py-5 shadow-sm mb-5">
+            <img src="/brand/remedix-logo.png" alt="REMEDIX" className="w-56 max-w-full" />
           </div>
-          <h1 className="text-3xl font-bold text-text-primary tracking-tight">
-            <ForceLTR>OryxStaff</ForceLTR>
-          </h1>
+          <p className="brand-eyebrow"><ForceLTR>REMEDIX</ForceLTR></p>
           <p className="text-text-secondary mt-2">{t('hospital_mgmt_system')}</p>
         </div>
 
         {/* Login Card */}
-        <div className="card-base p-8 shadow-xl border border-border-base bg-white overflow-hidden relative">
+        <div className="card-base p-8 shadow-[0_18px_50px_rgba(0,77,77,0.12)] border border-border-base bg-white overflow-hidden relative">
           <AnimatePresence mode="wait">
             {view === 'login' ? (
               <motion.div
@@ -140,7 +138,7 @@ export const LoginPage: React.FC = () => {
                       {t('username_or_email')}
                     </label>
                     <div className="relative group">
-                      <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-text-secondary group-focus-within:text-brand-primary-end transition-colors">
+                      <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-text-secondary group-focus-within:text-brand-deep-teal transition-colors">
                         <Mail className="w-4 h-4" />
                       </div>
                       <input
@@ -162,7 +160,7 @@ export const LoginPage: React.FC = () => {
                       </label>
                       <button 
                         type="button"
-                        className="text-xs font-medium text-brand-primary-end hover:underline"
+                        className="text-xs font-medium text-brand-deep-teal hover:underline"
                         onClick={() => {
                           setView('forgot-password');
                           setError('');
@@ -172,7 +170,7 @@ export const LoginPage: React.FC = () => {
                       </button>
                     </div>
                     <div className="relative group">
-                      <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-text-secondary group-focus-within:text-brand-primary-end transition-colors">
+                      <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-text-secondary group-focus-within:text-brand-deep-teal transition-colors">
                         <Lock className="w-4 h-4" />
                       </div>
                       <input
@@ -216,7 +214,7 @@ export const LoginPage: React.FC = () => {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-border-base text-brand-primary-end focus:ring-brand-primary-end transition-all cursor-pointer"
+                      className="w-4 h-4 rounded border-border-base text-brand-deep-teal focus:ring-brand-deep-teal transition-all cursor-pointer"
                     />
                     <label htmlFor="remember-me" className="ms-2 block text-sm text-text-secondary cursor-pointer">
                       {t('remember_me')}
@@ -226,7 +224,7 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full btn-gradient-primary py-2.5 flex items-center justify-center gap-2 shadow-lg shadow-brand-primary-start/20 disabled:opacity-70"
+                    className="w-full bg-brand-deep-teal hover:bg-[#003B3B] text-white rounded-xl py-2.5 flex items-center justify-center gap-2 shadow-md shadow-brand-deep-teal/20 transition-colors disabled:opacity-70"
                   >
                     {isSubmitting ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -265,7 +263,7 @@ export const LoginPage: React.FC = () => {
                         setIsResetSent(false);
                         setResetEmail('');
                       }}
-                      className="w-full btn-gradient-primary py-2.5"
+                      className="w-full bg-brand-deep-teal hover:bg-[#003B3B] text-white rounded-xl py-2.5 transition-colors"
                     >
                       {t('back_to_login')}
                     </button>
@@ -283,7 +281,7 @@ export const LoginPage: React.FC = () => {
                         {t('email_address')}
                       </label>
                       <div className="relative group">
-                        <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-text-secondary group-focus-within:text-brand-primary-end transition-colors">
+                        <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-text-secondary group-focus-within:text-brand-deep-teal transition-colors">
                           <Mail className="w-4 h-4" />
                         </div>
                         <input
@@ -301,7 +299,7 @@ export const LoginPage: React.FC = () => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full btn-gradient-primary py-2.5 flex items-center justify-center gap-2 shadow-lg shadow-brand-primary-start/20 disabled:opacity-70"
+                      className="w-full bg-brand-deep-teal hover:bg-[#003B3B] text-white rounded-xl py-2.5 flex items-center justify-center gap-2 shadow-md shadow-brand-deep-teal/20 transition-colors disabled:opacity-70"
                     >
                       {isSubmitting ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -328,7 +326,7 @@ export const LoginPage: React.FC = () => {
 
           <div className="mt-8 pt-6 border-t border-border-base text-center">
             <p className="text-xs text-text-secondary">
-              &copy; 2026 <ForceLTR>OryxStaff</ForceLTR>. {t('all_rights_reserved')}
+              &copy; 2026 <ForceLTR>REMEDIX</ForceLTR>. {t('all_rights_reserved')}
             </p>
           </div>
         </div>

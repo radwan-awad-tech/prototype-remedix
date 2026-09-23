@@ -10,14 +10,14 @@ export interface ThemePreset {
 }
 
 export const THEME_PRESETS: ThemePreset[] = [
-  { id: 'medical', name: 'Medical Green-Blue', start: '#4ED1B2', end: '#5B8CFF' },
-  { id: 'sky', name: 'Light Sky Blue', start: '#6ABFF3', end: '#8FD3FF' },
-  { id: 'royal', name: 'Royal Blue', start: '#6985FF', end: '#3F5BFF' },
-  { id: 'teal', name: 'Teal', start: '#2DD4BF', end: '#60A5FA' },
-  { id: 'sunset', name: 'Sunset Orange', start: '#F59E0B', end: '#EF4444' },
-  { id: 'forest', name: 'Forest Green', start: '#10B981', end: '#059669' },
-  { id: 'indigo', name: 'Indigo Purple', start: '#6366F1', end: '#4F46E5' },
-  { id: 'berry', name: 'Berry Rose', start: '#EC4899', end: '#8B5CF6' },
+  { id: 'medical', name: 'REMEDIX Core', start: '#004D4D', end: '#14B8A6' },
+  { id: 'sky', name: 'Digital Teal', start: '#0F766E', end: '#2DD4BF' },
+  { id: 'royal', name: 'Deep Ocean', start: '#003B49', end: '#14B8A6' },
+  { id: 'teal', name: 'Aqua Signal', start: '#006B68', end: '#5EEAD4' },
+  { id: 'sunset', name: 'Warm Contrast', start: '#115E59', end: '#F59E0B' },
+  { id: 'forest', name: 'Clinical Green', start: '#065F46', end: '#14B8A6' },
+  { id: 'indigo', name: 'Night Interface', start: '#111827', end: '#14B8A6' },
+  { id: 'berry', name: 'Teal Violet', start: '#164E63', end: '#A78BFA' },
 ];
 
 interface SettingsContextType {

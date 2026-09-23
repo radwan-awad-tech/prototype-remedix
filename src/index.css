@@ -1,9 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary-gradient-start: #4ED1B2;
-  --primary-gradient-end: #5B8CFF;
+  --brand-deep-teal: #004D4D;
+  --brand-digital-teal: #14B8A6;
+  --brand-off-white: #F7F7F5;
+  --brand-black: #111827;
+  --brand-light-gray: #DCE5EB;
+  --brand-muted-teal: #E7F5F3;
+  --primary-gradient-start: var(--brand-deep-teal);
+  --primary-gradient-end: var(--brand-digital-teal);
 }
 
 [dir="rtl"] {
@@ -11,40 +17,128 @@
 }
 
 @theme {
+  --font-sans: 'Inter', 'Noto Sans Arabic', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', 'Noto Sans Arabic', sans-serif;
+
   --color-brand-primary-start: var(--primary-gradient-start);
   --color-brand-primary-end: var(--primary-gradient-end);
-  --color-brand-secondary-start: #6ABFF3;
-  --color-brand-secondary-end: #6985FF;
+  --color-brand-deep-teal: var(--brand-deep-teal);
+  --color-brand-digital-teal: var(--brand-digital-teal);
+  --color-brand-muted-teal: var(--brand-muted-teal);
+  --color-brand-light-gray: var(--brand-light-gray);
+  --color-brand-secondary-start: #0F766E;
+  --color-brand-secondary-end: #2DD4BF;
   
-  --color-bg-main: #F7F9FC;
-  --color-border-base: #E5EAF2;
-  --color-text-primary: #1F2937;
-  --color-text-secondary: #6B7280;
+  --color-bg-main: var(--brand-off-white);
+  --color-border-base: var(--brand-light-gray);
+  --color-text-primary: var(--brand-black);
+  --color-text-secondary: #52616B;
 
-  --background-image-gradient-primary: linear-gradient(to right, var(--color-brand-primary-start), var(--color-brand-primary-end));
-  --background-image-gradient-secondary: linear-gradient(to right, var(--color-brand-secondary-start), var(--color-brand-secondary-end));
+  --background-image-gradient-primary: none;
+  --background-image-gradient-secondary: none;
 }
 
 @layer base {
+  html {
+    background: var(--brand-off-white);
+  }
+
   body {
     @apply bg-bg-main text-text-primary antialiased;
+    font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
+    min-width: 320px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Space Grotesk', 'Inter', 'Noto Sans Arabic', sans-serif;
+    letter-spacing: -0.025em;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  ::selection {
+    background: var(--brand-digital-teal);
+    color: white;
   }
 }
 
 @layer components {
   .btn-gradient-primary {
-    @apply bg-gradient-primary text-white hover:opacity-90 transition-opacity;
+    @apply bg-brand-deep-teal text-white hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200;
   }
   .btn-gradient-secondary {
-    @apply bg-gradient-secondary text-white hover:opacity-90 transition-opacity;
+    @apply bg-brand-digital-teal text-white hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200;
   }
   .btn-secondary {
-    @apply px-4 py-2 bg-white border border-border-base rounded-lg text-sm font-medium text-text-secondary hover:bg-bg-main transition-colors;
+    @apply px-4 py-2 bg-white border border-border-base rounded-xl text-sm font-medium text-text-secondary hover:border-brand-digital-teal/50 hover:bg-brand-muted-teal transition-all;
   }
   .card-base {
-    @apply bg-white border border-border-base rounded-xl shadow-sm;
+    @apply bg-white border border-border-base rounded-2xl shadow-sm;
   }
   .input-base {
-    @apply px-4 py-2 bg-white border border-border-base rounded-lg text-sm text-text-primary outline-none focus:ring-2 focus:ring-brand-primary-start/20 transition-all placeholder:text-text-secondary;
+    @apply px-4 py-2.5 bg-white border border-border-base rounded-xl text-sm text-text-primary outline-none focus:border-brand-digital-teal focus:ring-4 focus:ring-brand-digital-teal/10 transition-all placeholder:text-text-secondary;
   }
+
+  .brand-pattern {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .brand-pattern::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.16;
+    background-image: url('/brand/remedix-pattern.png');
+    background-repeat: no-repeat;
+    background-position: right -96px;
+    background-size: 1180px auto;
+    mix-blend-mode: multiply;
+  }
+
+  .brand-eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-brand-digital-teal;
+  }
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 77, 77, 0.22) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 77, 77, 0.22);
+  border-radius: 999px;
+}
+
+/* Legacy utility names are kept for compatibility, but REMEDIX uses flat color fills. */
+.bg-gradient-primary,
+.bg-gradient-secondary,
+[class*="bg-gradient-to-"] {
+  background-image: none !important;
+}
+
+.bg-gradient-primary {
+  background-color: var(--brand-deep-teal) !important;
+}
+
+.bg-gradient-secondary {
+  background-color: var(--brand-digital-teal) !important;
 }

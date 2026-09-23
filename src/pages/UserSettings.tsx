@@ -230,7 +230,7 @@ export const UserSettingsPage: React.FC = () => {
                         >
                           <div 
                             className="w-10 h-10 rounded-lg shrink-0" 
-                            style={{ background: `linear-gradient(135deg, ${preset.start}, ${preset.end})` }}
+                            style={{ backgroundColor: preset.start }}
                           />
                           <div className="text-start">
                             <p className={`font-bold ${theme.id === preset.id ? 'text-brand-primary-start' : 'text-text-primary'}`}>

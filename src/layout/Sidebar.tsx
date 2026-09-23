@@ -68,20 +68,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole, currentUser, acti
     <>
       <motion.aside
         animate={{ width: isCollapsed ? 80 : 260 }}
-        className="h-screen bg-white border-e border-border-base flex flex-col sticky top-0 z-30"
+        className="h-screen bg-white border-e border-brand-light-gray/80 flex flex-col sticky top-0 z-30 shadow-[8px_0_30px_rgba(0,77,77,0.04)]"
       >
         {/* Header / Logo */}
         <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-white font-bold shrink-0">O</div>
-              <span className="font-bold text-xl tracking-tight text-text-primary whitespace-nowrap">
-                <ForceLTR>OryxStaff</ForceLTR>
-              </span>
+            <div className="flex items-center gap-3">
+              <img src="/brand/remedix-logo.png" alt="REMEDIX" className="h-auto w-36 object-contain" />
             </div>
           )}
           {isCollapsed && (
-            <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-white font-bold shrink-0">O</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-deep-teal text-xl font-bold text-brand-digital-teal shadow-sm">X</div>
           )}
         </div>
 
@@ -90,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole, currentUser, acti
           {filteredNav.map((group) => (
             <div key={group.title} className="space-y-1">
               {!isCollapsed && group.children && (
-                <h4 className="px-3 text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-2">
+                <h4 className="px-3 text-[10px] font-bold text-brand-deep-teal/65 uppercase tracking-[0.16em] mb-2">
                   {group.translationKey ? t(group.translationKey as TranslationKey) : group.title}
                 </h4>
               )}

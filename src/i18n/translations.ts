@@ -401,6 +401,17 @@ export type TranslationKey =
   | 'go_home'
   | 'head_nurse'
   | 'headcount'
+  | 'operational_overview'
+  | 'system_status'
+  | 'active_employees'
+  | 'open_positions'
+  | 'department_distribution'
+  | 'team_status'
+  | 'recruitment_funnel'
+  | 'on_duty'
+  | 'present'
+  | 'exceptions'
+  | 'no_data'
   | 'health'
   | 'health_certificate'
   | 'health_subtitle'
@@ -2007,6 +2018,17 @@ export const translations: Record<Language, Record<string, string>> = {
     go_home: 'Go Home',
     head_nurse: 'Head Nurse',
     headcount: 'Headcount',
+    operational_overview: 'Operational overview',
+    system_status: 'System status',
+    active_employees: 'Active employees',
+    open_positions: 'Open positions',
+    department_distribution: 'Attendance by department',
+    team_status: 'Team status',
+    recruitment_funnel: 'Candidate pipeline by stage',
+    on_duty: 'On duty',
+    present: 'Present',
+    exceptions: 'Exceptions',
+    no_data: 'No data',
     health: 'Occupational Health',
     health_certificate: 'Health Certificate',
     health_subtitle: 'Manage workplace safety, employee health records, and medical compliance.',
@@ -3498,6 +3520,17 @@ export const translations: Record<Language, Record<string, string>> = {
     go_home: 'الرئيسية',
     head_nurse: 'رئيس ممرضين',
     headcount: 'عدد الموظفين',
+    operational_overview: 'نظرة تشغيلية',
+    system_status: 'حالة النظام',
+    active_employees: 'الموظفون النشطون',
+    open_positions: 'الشواغر المفتوحة',
+    department_distribution: 'الحضور حسب القسم',
+    team_status: 'حالة الفريق',
+    recruitment_funnel: 'مسار المرشحين حسب المرحلة',
+    on_duty: 'على رأس العمل',
+    present: 'حاضر',
+    exceptions: 'استثناءات',
+    no_data: 'لا توجد بيانات',
     health: 'الصحة المهنية',
     health_certificate: 'الشهادة الصحية',
     health_subtitle: 'إدارة سلامة مكان العمل، والسجلات الصحية للموظفين، والامتثال الطبي.',

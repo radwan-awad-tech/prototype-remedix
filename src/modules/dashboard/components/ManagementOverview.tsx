@@ -1,20 +1,32 @@
 import React from 'react';
-import { 
-  Users, Clock, Calendar, FileText, AlertCircle, TrendingUp, 
-  Briefcase, Shield, Activity, DollarSign, CheckCircle, BarChart3
+import {
+  Activity,
+  AlertTriangle,
+  BriefcaseBusiness,
+  CalendarCheck2,
+  CheckCircle2,
+  Clock3,
+  FileWarning,
+  Users,
+  WalletCards,
 } from 'lucide-react';
-import { 
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  LineChart, Line, PieChart, Pie, Cell, AreaChart, Area
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
+import { User } from '../../../types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { TranslationKey } from '../../../i18n/translations';
-import { DashboardWidget } from './DashboardWidget';
-import { useNavigation } from '../../../context/NavigationContext';
-import { User } from '../../../types';
-import { ForceLTR } from '../../../components/ForceLTR';
-
-const COLORS = ['var(--primary-gradient-start)', 'var(--primary-gradient-end)', '#6ABFF3', '#6985FF', '#A5B4FC'];
 
 interface ManagementOverviewProps {
   stats: any;
@@ -22,576 +34,292 @@ interface ManagementOverviewProps {
   user: User | null;
 }
 
-export const ManagementOverview: React.FC<ManagementOverviewProps> = ({ stats, chartsData, user }) => {
-  const { t } = useTranslation();
-  const { navigate } = useNavigation();
+const CHART_COLORS = ['#004D4D', '#14B8A6', '#6BA5A5', '#DCE5EB', '#111827'];
+const tooltipStyle = {
+  backgroundColor: '#FFFFFF',
+  border: '1px solid #DCE5EB',
+  borderRadius: 12,
+  boxShadow: '0 10px 30px rgba(17, 24, 39, 0.08)',
+  color: '#111827',
+};
 
-  const role = user?.role || 'Employee';
+const currency = (value: number) => new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+}).format(value || 0);
 
-  const isHR = role === 'HR Manager' || role === 'HR Officer';
-  const isPayroll = role === 'Payroll Manager' || role === 'Payroll Officer';
-  const isDeptHead = role === 'Department Head';
-  const isAdmin = role === 'Admin';
+const safeNumber = (value: unknown, fallback = 0) => (
+  typeof value === 'number' && Number.isFinite(value) ? value : fallback
+);
+
+const ChartCard: React.FC<{
+  title: string;
+  description: string;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ title, description, children, className = '' }) => (
+  <section className={`card-base p-5 md:p-6 ${className}`}>
+    <div className="mb-5 flex items-start justify-between gap-4">
+      <div>
+        <h3 className="font-display text-base font-semibold text-text-primary">{title}</h3>
+        <p className="mt-1 text-xs text-text-secondary">{description}</p>
+      </div>
+      <div className="h-2 w-2 shrink-0 rounded-full bg-brand-digital-teal" />
+    </div>
+    {children}
+  </section>
+);
+
+const MetricCard: React.FC<{
+  label: string;
+  value: string | number;
+  helper: string;
+  icon: React.ReactNode;
+  tone?: 'teal' | 'dark' | 'warning' | 'neutral';
+}> = ({ label, value, helper, icon, tone = 'teal' }) => {
+  const toneClasses = {
+    teal: 'bg-brand-muted-teal text-brand-deep-teal',
+    dark: 'bg-brand-deep-teal text-white',
+    warning: 'bg-amber-50 text-amber-700',
+    neutral: 'bg-slate-100 text-slate-700',
+  }[tone];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* KPI Grid - Dynamic based on role */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {(isHR || isAdmin) && (
-          <KPICard 
-            title={t('headcount')} value={<ForceLTR>{stats?.headcount.toLocaleString()}</ForceLTR>} 
-            change={{ value: 2.4, isPositive: true }} 
-            icon={<Users className="w-5 h-5" />} 
-            onClick={() => navigate('/employees')}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          />
-        )}
-        
-        {(isHR || isDeptHead || isAdmin) && (
-          <KPICard 
-            title={isDeptHead ? t('dept_attendance') : t('attendance')} value={<ForceLTR>{stats?.attendance}%</ForceLTR>} 
-            change={{ value: 1.1, isPositive: false }} 
-            icon={<TrendingUp className="w-5 h-5" />} 
-            onClick={() => navigate('/attendance')}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          />
-        )}
-
-        {(isHR || isDeptHead || isPayroll || isAdmin) && (
-          <KPICard 
-            title={t('pending_leaves')} value={<ForceLTR>{stats?.pendingLeaves}</ForceLTR>} 
-            icon={<Clock className="w-5 h-5" />} 
-            onClick={() => navigate('/leaves')}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          />
-        )}
-
-        {(isHR || isDeptHead || isAdmin) && (
-          <KPICard 
-            title={t('understaffed')} value={<ForceLTR>{stats?.understaffed}</ForceLTR>} 
-            icon={<AlertCircle className="w-5 h-5 text-rose-500" />} 
-            onClick={() => navigate('/scheduling')}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          />
-        )}
-
-        {(isHR || isAdmin) && (
-          <KPICard 
-            title={t('expiring_docs')} value={<ForceLTR>{stats?.expiringDocs}</ForceLTR>} 
-            icon={<FileText className="w-5 h-5" />} 
-            onClick={() => navigate('/licenses')}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          />
-        )}
-
-        {(isPayroll || isAdmin) && (
-          <KPICard 
-            title={t('payroll_status')} value={stats?.payrollStatus} 
-            icon={<Calendar className="w-5 h-5" />} 
-            onClick={() => navigate('/payroll')}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          />
-        )}
-
-        {isHR && (
-          <KPICard 
-            title={t('recruitment')} value={<ForceLTR>{stats?.recruitment}</ForceLTR>} 
-            icon={<Briefcase className="w-5 h-5" />} 
-            onClick={() => navigate('/recruitment')}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          />
-        )}
-
-        {isAdmin && (
-          <>
-            <KPICard 
-              title={t('active_users')} value={<ForceLTR>{stats?.activeUsers || 0}</ForceLTR>} 
-              icon={<Shield className="w-5 h-5" />} 
-              onClick={() => navigate('/settings')}
-              className="cursor-pointer hover:shadow-md transition-shadow"
-            />
-            <KPICard 
-              title={t('system_uptime')} value={<ForceLTR>{stats?.systemUptime || 99.9}%</ForceLTR>} 
-              icon={<Activity className="w-5 h-5" />} 
-              className="cursor-default"
-            />
-          </>
-        )}
-
-        {isPayroll && (
-          <KPICard 
-            title={t('net_payroll')} value={<ForceLTR>SAR {stats?.netPayroll?.toLocaleString() || 0}</ForceLTR>} 
-            icon={<DollarSign className="w-5 h-5" />} 
-            onClick={() => navigate('/payroll')}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          />
-        )}
-      </div>
-
-      {/* Quick Actions Bar - Horizontal for better balance */}
-      <DashboardWidget noPadding>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-px bg-border-base">
-          {isHR && (
-            <>
-              <button onClick={() => navigate('/employees')} className="p-4 bg-white flex items-center justify-center gap-2 hover:bg-brand-primary-start/5 transition-colors group">
-                <Users className="w-4 h-4 text-brand-primary-end" />
-                <span className="text-xs font-bold text-text-primary">{t('add_employee')}</span>
-              </button>
-              <button onClick={() => navigate('/recruitment')} className="p-4 bg-white flex items-center justify-center gap-2 hover:bg-brand-primary-start/5 transition-colors group">
-                <Briefcase className="w-4 h-4 text-brand-primary-end" />
-                <span className="text-xs font-bold text-text-primary">{t('new_request')}</span>
-              </button>
-            </>
-          )}
-          {isPayroll && (
-            <>
-              <button onClick={() => navigate('/payroll')} className="p-4 bg-white flex items-center justify-center gap-2 hover:bg-brand-primary-start/5 transition-colors group">
-                <DollarSign className="w-4 h-4 text-brand-primary-end" />
-                <span className="text-xs font-bold text-text-primary">{t('process_payroll')}</span>
-              </button>
-              <button onClick={() => navigate('/payroll')} className="p-4 bg-white flex items-center justify-center gap-2 hover:bg-brand-primary-start/5 transition-colors group">
-                <BarChart3 className="w-4 h-4 text-brand-primary-end" />
-                <span className="text-xs font-bold text-text-primary">{t('payroll_report')}</span>
-              </button>
-            </>
-          )}
-          {isDeptHead && (
-            <>
-              <button onClick={() => navigate('/scheduling')} className="p-4 bg-white flex items-center justify-center gap-2 hover:bg-brand-primary-start/5 transition-colors group">
-                <Calendar className="w-4 h-4 text-brand-primary-end" />
-                <span className="text-xs font-bold text-text-primary">{t('publish_schedule')}</span>
-              </button>
-              <button onClick={() => navigate('/leaves')} className="p-4 bg-white flex items-center justify-center gap-2 hover:bg-brand-primary-start/5 transition-colors group">
-                <CheckCircle className="w-4 h-4 text-brand-primary-end" />
-                <span className="text-xs font-bold text-text-primary">{t('approve_leaves')}</span>
-              </button>
-            </>
-          )}
-          {isAdmin && (
-            <>
-              <button onClick={() => navigate('/settings')} className="p-4 bg-white flex items-center justify-center gap-2 hover:bg-brand-primary-start/5 transition-colors group">
-                <Shield className="w-4 h-4 text-brand-primary-end" />
-                <span className="text-xs font-bold text-text-primary">{t('manage_security')}</span>
-              </button>
-              <button onClick={() => navigate('/settings')} className="p-4 bg-white flex items-center justify-center gap-2 hover:bg-brand-primary-start/5 transition-colors group">
-                <Activity className="w-4 h-4 text-brand-primary-end" />
-                <span className="text-xs font-bold text-text-primary">{t('audit_logs')}</span>
-              </button>
-            </>
-          )}
+    <div className="card-base p-5 transition-all duration-200 hover:-translate-y-1 hover:border-brand-digital-teal/50 hover:shadow-lg">
+      <div className="flex items-start justify-between gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${toneClasses}`}>
+          {icon}
         </div>
-      </DashboardWidget>
-
-      {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {(isHR || isAdmin) && (
-          <>
-            {/* Left Column - Primary Charts/Status */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <DashboardWidget title={t('dept_distribution')}>
-                  {chartsData?.deptDistribution && chartsData.deptDistribution.length > 0 ? (
-                    <>
-                      <div className="h-[250px]" dir="ltr">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={chartsData.deptDistribution}
-                              innerRadius={60}
-                              outerRadius={80}
-                              paddingAngle={5}
-                              dataKey="value"
-                              onClick={() => navigate('/employees')}
-                              className="cursor-pointer"
-                            >
-                              {chartsData.deptDistribution.map((entry: any, index: number) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} name={t(entry.name.toLowerCase() as TranslationKey)} />
-                              ))}
-                            </Pie>
-                            <Tooltip />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 mt-4">
-                        {chartsData.deptDistribution.map((dept: any, i: number) => (
-                          <div 
-                            key={dept.name} 
-                            className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
-                            onClick={() => navigate('/employees')}
-                          >
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                            <span>{t(dept.name.toLowerCase() as TranslationKey)} (<ForceLTR>{dept.value}</ForceLTR>)</span>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="h-[250px] flex flex-col items-center justify-center text-center text-text-secondary">
-                      <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
-                      <p className="text-sm">{t('no_data_available')}</p>
-                    </div>
-                  )}
-                </DashboardWidget>
-
-                <DashboardWidget title={t('attendance_trend')}>
-                  {chartsData?.attendanceTrend && chartsData.attendanceTrend.length > 0 ? (
-                    <div className="h-[250px]" dir="ltr">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart 
-                          data={chartsData.attendanceTrend.map((d: any) => ({ ...d, day: t(d.day.toLowerCase() as TranslationKey) }))}
-                          onClick={() => navigate('/attendance')}
-                          className="cursor-pointer"
-                        >
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5EAF2" />
-                          <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} />
-                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} domain={[80, 100]} />
-                          <Tooltip />
-                          <Line 
-                            type="monotone" 
-                            dataKey="rate" 
-                            stroke="var(--primary-gradient-end)" 
-                            strokeWidth={3} 
-                            dot={{ r: 4, fill: 'var(--primary-gradient-end)', strokeWidth: 2, stroke: '#fff' }} 
-                            activeDot={{ r: 6 }}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : (
-                    <div className="h-[250px] flex flex-col items-center justify-center text-center text-text-secondary">
-                      <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
-                      <p className="text-sm">{t('no_data_available')}</p>
-                    </div>
-                  )}
-                </DashboardWidget>
-              </div>
-
-              {isAdmin && (
-                <DashboardWidget title={t('user_activity_trend')}>
-                  <div className="h-[300px]" dir="ltr">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={[
-                        { time: '08:00', users: 5 },
-                        { time: '10:00', users: 18 },
-                        { time: '12:00', users: 24 },
-                        { time: '14:00', users: 22 },
-                        { time: '16:00', users: 15 },
-                        { time: '18:00', users: 8 },
-                      ]}>
-                        <defs>
-                          <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--primary-gradient-end)" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="var(--primary-gradient-end)" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5EAF2" />
-                        <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} />
-                        <Tooltip />
-                        <Area type="monotone" dataKey="users" stroke="var(--primary-gradient-end)" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={3} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </DashboardWidget>
-              )}
-            </div>
-
-            {/* Right Column - Secondary Info */}
-            <div className="space-y-6">
-              <DashboardWidget title={t('expiring_this_week')}>
-                <div className="space-y-3">
-                  {chartsData?.expiringDocs && chartsData.expiringDocs.length > 0 ? (
-                    chartsData.expiringDocs.map((alert: any) => (
-                      <div 
-                        key={alert.id} 
-                        onClick={() => navigate('/licenses')} 
-                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                          alert.severity === 'High' ? 'border-amber-100 bg-amber-50 hover:bg-amber-100' : 'border-border-base hover:bg-bg-main'
-                        }`}
-                      >
-                        <p className={`text-xs font-bold ${alert.severity === 'High' ? 'text-amber-800' : 'text-text-primary'}`}>
-                          {alert.message.split(' for ')[0]}
-                        </p>
-                        <p className={`text-[10px] mt-1 ${alert.severity === 'High' ? 'text-amber-700' : 'text-text-secondary'}`}>
-                          {alert.message.split(' for ')[1]?.split(' expires ')[0] || ''} • {alert.date}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-text-secondary italic text-center py-2">{t('no_expiring_docs')}</p>
-                  )}
-                </div>
-              </DashboardWidget>
-
-              {isHR && (
-                <DashboardWidget title={t('recent_hires')}>
-                  <div className="space-y-3">
-                    {chartsData?.recentHires && chartsData.recentHires.length > 0 ? (
-                      chartsData.recentHires.map((hire: any) => (
-                        <div key={hire.id} className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-bg-main flex items-center justify-center text-text-secondary text-[10px] font-bold">
-                            {hire.name.split(' ').map((n: string) => n[0]).join('')}
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-text-primary">{hire.name}</p>
-                            <p className="text-[10px] text-text-secondary">{t(hire.dept.toLowerCase() as TranslationKey)} • {hire.date}</p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-text-secondary italic text-center py-2">{t('no_recent_hires')}</p>
-                    )}
-                  </div>
-                </DashboardWidget>
-              )}
-
-              {isAdmin && (
-                <DashboardWidget title={t('security_alerts')}>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-2 bg-rose-50 rounded-lg border border-rose-100">
-                      <Shield className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-rose-800">{t('failed_login_attempts')}</p>
-                        <p className="text-[10px] text-rose-700">5 attempts from IP 192.168.1.42</p>
-                      </div>
-                    </div>
-                  </div>
-                </DashboardWidget>
-              )}
-            </div>
-          </>
-        )}
-
-        {isPayroll && (
-          <div className="lg:col-span-3">
-            <DashboardWidget title={t('payroll_cycle')}>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-text-primary">
-                      {new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-                    </p>
-                    <p className="text-xs text-text-secondary">{t('cutoff_date')}: 25 {new Date().toLocaleDateString(undefined, { month: 'long' })}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-brand-primary-end">{chartsData?.payrollCycle?.progress || 0}%</p>
-                    <p className="text-[10px] text-text-secondary">{t('calculation_progress')}</p>
-                  </div>
-                </div>
-                <div className="w-full h-2 bg-bg-main rounded-full overflow-hidden">
-                  <div className="h-full bg-brand-primary-end" style={{ width: `${chartsData?.payrollCycle?.progress || 0}%` }} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                    <p className="text-[10px] text-emerald-700 font-bold uppercase">{t('calculated')}</p>
-                    <p className="text-lg font-bold text-emerald-800"><ForceLTR>{chartsData?.payrollCycle?.calculated || 0}</ForceLTR></p>
-                  </div>
-                  <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
-                    <p className="text-[10px] text-amber-700 font-bold uppercase">{t('pending')}</p>
-                    <p className="text-lg font-bold text-amber-800"><ForceLTR>{chartsData?.payrollCycle?.pending || 0}</ForceLTR></p>
-                  </div>
-                  <div className="p-3 bg-rose-50 rounded-lg border border-rose-100">
-                    <p className="text-[10px] text-rose-700 font-bold uppercase">{t('exceptions_found')}</p>
-                    <p className="text-lg font-bold text-rose-800"><ForceLTR>{chartsData?.payrollCycle?.exceptions || 0}</ForceLTR></p>
-                  </div>
-                </div>
-              </div>
-            </DashboardWidget>
-          </div>
-        )}
-
-        {isDeptHead && (
-          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-            <div className="md:col-span-2 space-y-6">
-              <DashboardWidget title={t('team_status_today')}>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-center">
-                    <p className="text-[10px] text-emerald-700 font-bold uppercase mb-1">{t('clocked_in')}</p>
-                    <p className="text-2xl font-bold text-emerald-800"><ForceLTR>{chartsData?.teamStatus?.clockedIn || 0}</ForceLTR></p>
-                  </div>
-                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 text-center">
-                    <p className="text-[10px] text-amber-700 font-bold uppercase mb-1">{t('late')}</p>
-                    <p className="text-2xl font-bold text-amber-800"><ForceLTR>{chartsData?.teamStatus?.late || 0}</ForceLTR></p>
-                  </div>
-                  <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center">
-                    <p className="text-[10px] text-blue-700 font-bold uppercase mb-1">{t('on_leave')}</p>
-                    <p className="text-2xl font-bold text-blue-800"><ForceLTR>{chartsData?.teamStatus?.onLeave || 0}</ForceLTR></p>
-                  </div>
-                  <div className="p-4 bg-rose-50 rounded-xl border border-rose-100 text-center">
-                    <p className="text-[10px] text-rose-700 font-bold uppercase mb-1">{t('absent')}</p>
-                    <p className="text-2xl font-bold text-rose-800"><ForceLTR>{Math.max(0, chartsData?.teamStatus?.absent || 0)}</ForceLTR></p>
-                  </div>
-                </div>
-              </DashboardWidget>
-
-              <DashboardWidget title={t('roster_summary')}>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="flex items-center justify-between p-3 bg-bg-main rounded-lg">
-                    <span className="text-sm text-text-secondary">{t('morning_shift')}</span>
-                    <span className="text-sm font-bold text-text-primary"><ForceLTR>{chartsData?.rosterSummary?.morning || 0}</ForceLTR> {t('assigned')}</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-bg-main rounded-lg">
-                    <span className="text-sm text-text-secondary">{t('evening_shift')}</span>
-                    <span className="text-sm font-bold text-text-primary"><ForceLTR>{chartsData?.rosterSummary?.evening || 0}</ForceLTR> {t('assigned')}</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-bg-main rounded-lg border-s-4 border-rose-400">
-                    <span className="text-sm text-text-secondary">{t('night_shift')}</span>
-                    <span className="text-sm font-bold text-rose-600">
-                      {chartsData?.rosterSummary?.night > 0 ? (
-                        <><ForceLTR>{chartsData.rosterSummary.night}</ForceLTR> {t('assigned')}</>
-                      ) : (
-                        <>{t('understaffed')} (<ForceLTR>-1</ForceLTR>)</>
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </DashboardWidget>
-
-              <DashboardWidget title={t('attendance_trend')}>
-                {chartsData?.attendanceTrend && chartsData.attendanceTrend.length > 0 ? (
-                  <div className="h-[200px]" dir="ltr">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart 
-                        data={chartsData.attendanceTrend.map((d: any) => ({ ...d, day: t(d.day.toLowerCase() as TranslationKey) }))}
-                        onClick={() => navigate('/attendance')}
-                        className="cursor-pointer"
-                      >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5EAF2" />
-                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6B7280' }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6B7280' }} domain={[80, 100]} />
-                        <Tooltip />
-                        <Line 
-                          type="monotone" 
-                          dataKey="rate" 
-                          stroke="var(--primary-gradient-end)" 
-                          strokeWidth={2} 
-                          dot={{ r: 3, fill: 'var(--primary-gradient-end)', strokeWidth: 2, stroke: '#fff' }} 
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="h-[200px] flex flex-col items-center justify-center text-center text-text-secondary">
-                    <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
-                    <p className="text-sm">{t('no_data_available')}</p>
-                  </div>
-                )}
-              </DashboardWidget>
-            </div>
-
-            <div className="space-y-6">
-              <DashboardWidget title={t('pending_team_approvals')}>
-                <div className="space-y-3">
-                  {chartsData?.pendingApprovals && chartsData.pendingApprovals.length > 0 ? (
-                    chartsData.pendingApprovals.map((req: any) => (
-                      <div 
-                        key={req.id} 
-                        onClick={() => navigate('/leaves')}
-                        className="p-3 border border-border-base rounded-lg hover:bg-bg-main cursor-pointer transition-colors"
-                      >
-                        <div className="flex justify-between items-start mb-1">
-                          <p className="text-xs font-bold text-text-primary">{req.employeeName}</p>
-                          <span className="text-[10px] px-1.5 py-0.5 bg-brand-primary-start/10 text-brand-primary-end rounded font-medium">
-                            {t(req.type.toLowerCase() as TranslationKey)}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-text-secondary">{req.details}</p>
-                        <p className="text-[10px] text-text-secondary mt-1 italic">{req.date}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-text-secondary italic text-center py-4">{t('no_pending_approvals')}</p>
-                  )}
-                  <button 
-                    onClick={() => navigate('/leaves')}
-                    className="w-full py-2 text-xs font-bold text-brand-primary-end hover:bg-brand-primary-start/5 rounded-lg transition-colors border border-dashed border-brand-primary-start/30"
-                  >
-                    {t('view_all_approvals')}
-                  </button>
-                </div>
-              </DashboardWidget>
-
-              <DashboardWidget title={t('expiring_this_week')}>
-                <div className="space-y-3">
-                  {chartsData?.expiringDocs && chartsData.expiringDocs.length > 0 ? (
-                    chartsData.expiringDocs.map((alert: any) => (
-                      <div 
-                        key={alert.id} 
-                        onClick={() => navigate('/licenses')} 
-                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                          alert.severity === 'High' ? 'border-amber-100 bg-amber-50 hover:bg-amber-100' : 'border-border-base hover:bg-bg-main'
-                        }`}
-                      >
-                        <p className={`text-xs font-bold ${alert.severity === 'High' ? 'text-amber-800' : 'text-text-primary'}`}>
-                          {alert.message.split(' for ')[0]}
-                        </p>
-                        <p className={`text-[10px] mt-1 ${alert.severity === 'High' ? 'text-amber-700' : 'text-text-secondary'}`}>
-                          {alert.message.split(' for ')[1]?.split(' expires ')[0] || ''} • {alert.date}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-text-secondary italic text-center py-2">{t('no_expiring_docs')}</p>
-                  )}
-                </div>
-              </DashboardWidget>
-
-              <DashboardWidget title={t('on_leave_today')}>
-                <div className="space-y-3">
-                  {chartsData?.onLeaveToday && chartsData.onLeaveToday.length > 0 ? (
-                    chartsData.onLeaveToday.map((person: any) => (
-                      <div key={person.id} className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-brand-primary-start/10 flex items-center justify-center text-brand-primary-end text-xs font-bold">
-                          {person.initials}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-text-primary">{person.name}</p>
-                          <p className="text-[10px] text-text-secondary">{t(person.type.toLowerCase() as TranslationKey)}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-text-secondary italic text-center py-2">{t('no_one_on_leave')}</p>
-                  )}
-                </div>
-              </DashboardWidget>
-            </div>
-          </div>
-        )}
+        <Activity className="h-4 w-4 text-brand-digital-teal" />
       </div>
+      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary">{label}</p>
+      <p className="mt-1 font-display text-2xl font-bold text-text-primary">{value}</p>
+      <p className="mt-1 text-xs text-text-secondary">{helper}</p>
     </div>
   );
 };
 
-// Helper components for the KPI Grid
-const KPICard: React.FC<{
-  title: string;
-  value: React.ReactNode;
-  change?: { value: number; isPositive: boolean };
-  icon: React.ReactNode;
-  onClick?: () => void;
-  className?: string;
-}> = ({ title, value, change, icon, onClick, className }) => {
+export const ManagementOverview: React.FC<ManagementOverviewProps> = ({ stats, chartsData, user }) => {
   const { t } = useTranslation();
+  const translate = (key: string) => t(key as TranslationKey);
+
+  const attendanceTrend = chartsData?.attendanceTrend?.length >= 3
+    ? chartsData.attendanceTrend
+    : [
+        { day: 'Mon', rate: 92 },
+        { day: 'Tue', rate: 95 },
+        { day: 'Wed', rate: 91 },
+        { day: 'Thu', rate: 96 },
+        { day: 'Fri', rate: 94 },
+        { day: 'Sat', rate: 89 },
+        { day: 'Sun', rate: 93 },
+      ];
+
+  const departmentDistribution = chartsData?.deptDistribution?.length
+    ? chartsData.deptDistribution
+    : [{ name: translate('no_data'), value: 1 }];
+
+  const attendanceByDepartment = chartsData?.attendanceByDepartment?.length
+    ? chartsData.attendanceByDepartment
+    : departmentDistribution.map((item: any) => ({ name: item.name, onTime: item.value, late: 0, absent: 0 }));
+
+  const leaveStatus = chartsData?.leaveStatus?.length
+    ? chartsData.leaveStatus
+    : [{ name: 'Pending', value: safeNumber(stats?.pendingLeaves) }];
+
+  const recruitmentFunnel = chartsData?.recruitmentFunnel?.length
+    ? chartsData.recruitmentFunnel
+    : [{ name: 'Open roles', value: safeNumber(stats?.recruitment) }];
+
+  const staffingMix = chartsData?.staffingMix?.length
+    ? chartsData.staffingMix
+    : [{ name: translate('on_duty'), value: safeNumber(stats?.headcount) }];
+
+  const recentHires = chartsData?.recentHires || [];
+  const expiringDocs = chartsData?.expiringDocs || [];
+  const teamStatus = chartsData?.teamStatus || {};
+  const payrollTrend = chartsData?.payrollTrend || [];
+  const payrollCycle = chartsData?.payrollCycle || {};
+
   return (
-    <div 
-      onClick={onClick}
-      className={`card-base p-4 flex flex-col justify-between transition-all ${className}`}
-    >
-      <div className="flex items-start justify-between mb-2">
-        <div className="p-2 rounded-lg bg-brand-primary-start/10 text-brand-primary-end">
-          {icon}
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="brand-eyebrow">{user?.department || translate('all_departments')}</p>
+          <h2 className="mt-2 font-display text-2xl font-bold text-text-primary">{translate('operational_overview')}</h2>
+          <p className="mt-1 max-w-2xl text-sm text-text-secondary">{translate('dashboard_subtitle')}</p>
         </div>
-        {change && (
-          <div className={`text-[10px] font-bold ${change.isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
-            {change.isPositive ? '↑' : '↓'} {change.value}%
+        <div className="rounded-xl border border-brand-light-gray bg-white px-4 py-3 text-end shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-secondary">{translate('system_status')}</p>
+          <div className="mt-1 flex items-center justify-end gap-2 text-sm font-semibold text-brand-deep-teal">
+            <span className="h-2 w-2 rounded-full bg-brand-digital-teal" />
+            {translate('active')}
           </div>
-        )}
+        </div>
       </div>
-      <div>
-        <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wider mb-1">{title}</p>
-        <h3 className="text-lg font-bold text-text-primary">{value}</h3>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <MetricCard label={translate('headcount')} value={safeNumber(stats?.headcount)} helper={translate('active_employees')} icon={<Users className="h-5 w-5" />} tone="dark" />
+        <MetricCard label={translate('attendance')} value={`${safeNumber(stats?.attendance).toFixed(1)}%`} helper={translate('attendance_trend')} icon={<CalendarCheck2 className="h-5 w-5" />} />
+        <MetricCard label={translate('pending_leaves')} value={safeNumber(stats?.pendingLeaves)} helper={translate('leave_requests')} icon={<Clock3 className="h-5 w-5" />} tone="warning" />
+        <MetricCard label={translate('understaffed')} value={safeNumber(stats?.understaffed)} helper={translate('staffing_levels')} icon={<AlertTriangle className="h-5 w-5" />} tone="warning" />
+        <MetricCard label={translate('expiring_docs')} value={safeNumber(stats?.expiringDocs)} helper={translate('compliance_documents')} icon={<FileWarning className="h-5 w-5" />} tone="neutral" />
+        <MetricCard label={translate('recruitment')} value={safeNumber(stats?.recruitment)} helper={translate('open_positions')} icon={<BriefcaseBusiness className="h-5 w-5" />} />
       </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <ChartCard title={translate('attendance_trend')} description={translate('dept_attendance')}>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={attendanceTrend} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid stroke="#DCE5EB" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="day" tick={{ fill: '#52616B', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[0, 100]} tick={{ fill: '#52616B', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value}%`} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value}%`, translate('attendance')]} />
+                <Line type="monotone" dataKey="rate" stroke="#004D4D" strokeWidth={3} dot={{ r: 4, fill: '#14B8A6', stroke: '#004D4D', strokeWidth: 2 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartCard>
+
+        <ChartCard title={translate('department_distribution')} description={translate('staffing_levels')}>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={attendanceByDepartment} layout="vertical" margin={{ top: 4, right: 12, left: 12, bottom: 0 }}>
+                <CartesianGrid stroke="#DCE5EB" strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={92} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 10 }} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Bar dataKey="onTime" name={translate('present')} stackId="attendance" fill="#004D4D" />
+                <Bar dataKey="late" name={translate('late')} stackId="attendance" fill="#14B8A6" />
+                <Bar dataKey="absent" name={translate('absent')} stackId="attendance" fill="#DCE5EB" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartCard>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <ChartCard title={translate('team_status')} description={translate('on_duty')}>
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={staffingMix} dataKey="value" nameKey="name" innerRadius={56} outerRadius={82} paddingAngle={4} stroke="none">
+                  {staffingMix.map((_: any, index: number) => <Cell key={`staff-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                </Pie>
+                <Tooltip contentStyle={tooltipStyle} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="grid grid-cols-3 gap-2 border-t border-border-base pt-4 text-center">
+            <div><p className="text-lg font-bold text-brand-deep-teal">{safeNumber(teamStatus.clockedIn)}</p><p className="text-[10px] text-text-secondary">{translate('clocked_in')}</p></div>
+            <div><p className="text-lg font-bold text-amber-600">{safeNumber(teamStatus.late)}</p><p className="text-[10px] text-text-secondary">{translate('late')}</p></div>
+            <div><p className="text-lg font-bold text-slate-500">{safeNumber(teamStatus.absent)}</p><p className="text-[10px] text-text-secondary">{translate('absent')}</p></div>
+          </div>
+        </ChartCard>
+
+        <ChartCard title={translate('leave_requests')} description={translate('pending_leaves')}>
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={leaveStatus} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid stroke="#DCE5EB" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 10 }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 10 }} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Bar dataKey="value" fill="#14B8A6" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartCard>
+
+        <ChartCard title={translate('payroll_cycle')} description={translate('payroll_summary')}>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-display text-3xl font-bold text-brand-deep-teal">{safeNumber(payrollCycle.progress)}%</p>
+              <p className="mt-1 text-xs text-text-secondary">{translate('calculation_progress')}</p>
+            </div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-muted-teal text-brand-deep-teal">
+              <WalletCards className="h-7 w-7" />
+            </div>
+          </div>
+          <div className="mt-6 h-3 overflow-hidden rounded-full bg-brand-light-gray">
+            <div className="h-full rounded-full bg-brand-deep-teal" style={{ width: `${Math.min(100, Math.max(0, safeNumber(payrollCycle.progress)))}%` }} />
+          </div>
+          <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+            <div><p className="font-semibold text-text-primary">{safeNumber(payrollCycle.calculated)}</p><p className="text-[10px] text-text-secondary">{translate('calculated')}</p></div>
+            <div><p className="font-semibold text-text-primary">{safeNumber(payrollCycle.pending)}</p><p className="text-[10px] text-text-secondary">{translate('pending')}</p></div>
+            <div><p className="font-semibold text-rose-600">{safeNumber(payrollCycle.exceptions)}</p><p className="text-[10px] text-text-secondary">{translate('exceptions')}</p></div>
+          </div>
+          {payrollTrend.length > 0 && (
+            <p className="mt-5 border-t border-border-base pt-4 text-xs text-text-secondary">
+              {translate('net_payroll')}: <span className="font-semibold text-text-primary">{currency(payrollTrend[payrollTrend.length - 1].net)}</span>
+            </p>
+          )}
+        </ChartCard>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <ChartCard title={translate('recruitment_candidate_pipeline')} description={translate('recruitment_funnel')} className="xl:col-span-2">
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={recruitmentFunnel} layout="vertical" margin={{ top: 5, right: 16, left: 16, bottom: 0 }}>
+                <CartesianGrid stroke="#DCE5EB" strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={84} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 10 }} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Bar dataKey="value" fill="#004D4D" radius={[0, 6, 6, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartCard>
+
+        <section className="card-base p-5 md:p-6">
+          <div className="mb-5 flex items-start justify-between">
+            <div>
+              <h3 className="font-display text-base font-semibold text-text-primary">{translate('expiring_this_week')}</h3>
+              <p className="mt-1 text-xs text-text-secondary">{translate('compliance_alerts')}</p>
+            </div>
+            <FileWarning className="h-5 w-5 text-amber-600" />
+          </div>
+          <div className="space-y-3">
+            {expiringDocs.length > 0 ? expiringDocs.slice(0, 4).map((item: any) => (
+              <div key={item.id} className="rounded-xl border border-amber-100 bg-amber-50/70 p-3">
+                <p className="text-sm font-semibold text-text-primary">{item.message}</p>
+                <p className="mt-1 text-xs text-amber-700">{item.date}</p>
+              </div>
+            )) : (
+              <div className="flex flex-col items-center rounded-xl border border-dashed border-border-base p-8 text-center">
+                <CheckCircle2 className="h-8 w-8 text-brand-digital-teal" />
+                <p className="mt-3 text-sm font-semibold text-text-primary">{translate('no_expiring_docs')}</p>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      <section className="card-base p-5 md:p-6">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-display text-base font-semibold text-text-primary">{translate('recent_hires')}</h3>
+            <p className="mt-1 text-xs text-text-secondary">{translate('recent_hires')}</p>
+          </div>
+          <Users className="h-5 w-5 text-brand-digital-teal" />
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {recentHires.length > 0 ? recentHires.map((hire: any) => (
+            <div key={hire.id} className="flex items-center gap-3 rounded-xl border border-border-base bg-brand-off-white/50 p-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-deep-teal text-xs font-bold text-white">
+                {hire.name.split(' ').map((part: string) => part[0]).join('').slice(0, 2)}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-text-primary">{hire.name}</p>
+                <p className="truncate text-xs text-text-secondary">{hire.dept}</p>
+              </div>
+            </div>
+          )) : <p className="text-sm text-text-secondary">{translate('no_recent_hires')}</p>}
+        </div>
+      </section>
     </div>
   );
 };

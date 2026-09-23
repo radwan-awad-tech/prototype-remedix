@@ -29,11 +29,14 @@ export const AppShell: React.FC<AppShellProps> = ({
         onLogout={onLogout}
       />
       
-      <main className="flex-1 flex flex-col p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+      <main className="relative flex-1 flex flex-col min-w-0 overflow-y-auto px-4 py-5 md:px-8 md:py-8">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-brand-muted-teal/30" />
+        <div className="brand-pattern pointer-events-none absolute end-0 top-0 h-72 w-[42rem]" />
         <Breadcrumbs currentPath={activePath} onNavigate={onNavigate} />
         <AnimatePresence mode="wait">
           <motion.div
             key={activePath}
+            className="relative z-10 mx-auto w-full max-w-[1440px]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

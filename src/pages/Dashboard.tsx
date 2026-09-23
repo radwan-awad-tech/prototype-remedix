@@ -184,7 +184,7 @@ export const DashboardPage: React.FC = () => {
           <div className="pt-6 border-t border-border-base flex gap-3">
             <button
               onClick={handleApplyFilters}
-              className="btn-primary flex-1"
+            className="btn-gradient-primary flex-1 rounded-xl px-4 py-2.5 font-semibold"
             >
               {t('apply_filters')}
             </button>
