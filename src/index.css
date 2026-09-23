@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-gradient-start: #4ED1B2;
+  --primary-gradient-end: #5B8CFF;
+}
+
+[dir="rtl"] {
+  font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
+}
+
+@theme {
+  --color-brand-primary-start: var(--primary-gradient-start);
+  --color-brand-primary-end: var(--primary-gradient-end);
+  --color-brand-secondary-start: #6ABFF3;
+  --color-brand-secondary-end: #6985FF;
+  
+  --color-bg-main: #F7F9FC;
+  --color-border-base: #E5EAF2;
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+
+  --background-image-gradient-primary: linear-gradient(to right, var(--color-brand-primary-start), var(--color-brand-primary-end));
+  --background-image-gradient-secondary: linear-gradient(to right, var(--color-brand-secondary-start), var(--color-brand-secondary-end));
+}
+
+@layer base {
+  body {
+    @apply bg-bg-main text-text-primary antialiased;
+  }
+}
+
+@layer components {
+  .btn-gradient-primary {
+    @apply bg-gradient-primary text-white hover:opacity-90 transition-opacity;
+  }
+  .btn-gradient-secondary {
+    @apply bg-gradient-secondary text-white hover:opacity-90 transition-opacity;
+  }
+  .btn-secondary {
+    @apply px-4 py-2 bg-white border border-border-base rounded-lg text-sm font-medium text-text-secondary hover:bg-bg-main transition-colors;
+  }
+  .card-base {
+    @apply bg-white border border-border-base rounded-xl shadow-sm;
+  }
+  .input-base {
+    @apply px-4 py-2 bg-white border border-border-base rounded-lg text-sm text-text-primary outline-none focus:ring-2 focus:ring-brand-primary-start/20 transition-all placeholder:text-text-secondary;
+  }
+}
