@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Globe, Palette, User, Shield, Bell, LogOut, Mail, Phone, Lock, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useSettings, THEME_PRESETS, Language } from '../context/SettingsContext';
+import { Globe, User, Shield, Bell, LogOut, Mail, Phone, Lock, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useSettings, Language } from '../context/SettingsContext';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../modules/auth/AuthContext';
@@ -10,7 +10,7 @@ import { ForceLTR } from '../components/ForceLTR';
 type SettingsTab = 'profile' | 'appearance' | 'security' | 'notifications';
 
 export const UserSettingsPage: React.FC = () => {
-  const { language, setLanguage, theme, setTheme } = useSettings();
+  const { language, setLanguage } = useSettings();
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
@@ -28,7 +28,7 @@ export const UserSettingsPage: React.FC = () => {
 
   const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; subtitle: string }[] = [
     { id: 'profile', label: t('profile'), icon: <User className="w-5 h-5" />, subtitle: t('profile_settings_subtitle') },
-    { id: 'appearance', label: t('appearance'), icon: <Palette className="w-5 h-5" />, subtitle: t('appearance_subtitle') },
+    { id: 'appearance', label: t('language'), icon: <Globe className="w-5 h-5" />, subtitle: t('select_language') },
     { id: 'security', label: t('security_tab'), icon: <Shield className="w-5 h-5" />, subtitle: t('security_subtitle') },
     { id: 'notifications', label: t('notifications'), icon: <Bell className="w-5 h-5" />, subtitle: t('notifications_subtitle') },
   ];
@@ -205,43 +205,6 @@ export const UserSettingsPage: React.FC = () => {
                     </div>
                   </section>
 
-                  {/* Theme Section */}
-                  <section className="card-base p-6">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
-                        <Palette className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-text-primary">{t('theme')}</h3>
-                        <p className="text-sm text-text-secondary">{t('select_theme')}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {THEME_PRESETS.map((preset) => (
-                        <button
-                          key={preset.id}
-                          onClick={() => setTheme(preset)}
-                          className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
-                            theme.id === preset.id 
-                              ? 'border-brand-primary-start bg-brand-primary-start/5' 
-                              : 'border-border-base hover:border-text-secondary/30'
-                          }`}
-                        >
-                          <div 
-                            className="w-10 h-10 rounded-lg shrink-0" 
-                            style={{ backgroundColor: preset.start }}
-                          />
-                          <div className="text-start">
-                            <p className={`font-bold ${theme.id === preset.id ? 'text-brand-primary-start' : 'text-text-primary'}`}>
-                              {t(`theme_${preset.id}` as any)}
-                            </p>
-                            <p className="text-xs text-text-secondary">{t('primary_gradient')}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </section>
                 </div>
               )}
 

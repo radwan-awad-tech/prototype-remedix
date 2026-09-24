@@ -46,8 +46,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole, currentUser, acti
       .filter(item => {
         // Check explicit roles if defined
         if (item.roles && !item.roles.includes(currentRole)) return false;
-        // Check global permissions mapping
-        if (!canAccessPath(currentRole, item.path)) return false;
+        // Groups are containers; only leaf routes need a permission check.
+        if (!item.children && !canAccessPath(currentRole, item.path)) return false;
         return true;
       })
       .map(item => {

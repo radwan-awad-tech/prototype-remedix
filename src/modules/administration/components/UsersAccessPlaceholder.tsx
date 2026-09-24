@@ -1,11 +1,42 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Key, Fingerprint, ShieldAlert, UserPlus, Search, AlertCircle, MoreVertical, Edit2, Shield, Trash2, Save } from 'lucide-react';
+import { Users, Key, ShieldAlert, UserPlus, Search, AlertCircle, Edit2, ShieldCheck, Save } from 'lucide-react';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { mockAdminUsers } from '../mockData';
 import { AdminUser } from '../types';
+import { RoleType } from '../../../types';
+import { ROLE_ACCESS_POLICIES, ROLE_ORDER } from '../../auth/permissions';
 import { Drawer } from '../../../components/ui/Drawer';
 import { useToast } from '../../../components/ui/Toast';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
+
+const ROLE_TRANSLATION_KEYS: Record<RoleType, string> = {
+  'System Admin': 'system_admin',
+  'HR Manager': 'hr_manager',
+  'HR Officer': 'hr_officer',
+  'Department Head': 'dept_head',
+  'Payroll Officer': 'payroll_officer',
+  Accountant: 'accountant',
+  'Occupational Health Officer': 'occ_health_officer',
+  Employee: 'employee',
+};
+
+const MODULE_TRANSLATION_KEYS: Record<string, string> = {
+  '/': 'dashboard',
+  '/employees': 'employees',
+  '/doctors': 'doctors',
+  '/scheduling': 'scheduling',
+  '/leaves': 'leaves',
+  '/attendance': 'attendance',
+  '/licenses': 'licenses',
+  '/recruitment': 'recruitment',
+  '/performance': 'performance',
+  '/payroll': 'payroll',
+  '/health': 'health',
+  '/reports': 'reports',
+  '/admin': 'admin',
+  '/settings': 'settings',
+  '/profile': 'profile',
+};
 
 export const UsersAccessPlaceholder: React.FC = () => {
   const { t } = useTranslation();
@@ -15,7 +46,16 @@ export const UsersAccessPlaceholder: React.FC = () => {
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [selectedRole, setSelectedRole] = useState<RoleType>('HR Manager');
   const [isSaving, setIsSaving] = useState(false);
+  const selectedPolicy = ROLE_ACCESS_POLICIES[selectedRole];
+
+  const roleLabel = (role: RoleType) => t(ROLE_TRANSLATION_KEYS[role] as any);
+  const moduleLabel = (path: string) => t(MODULE_TRANSLATION_KEYS[path] as any);
+  const accessLabel = (level: string) => level === 'manage' ? t('full_access') : level === 'review' ? t('approval_review') : t('view');
+  const scopeLabel = (scope: string) => scope === 'organization'
+    ? t('organization_scope')
+    : scope === 'department' ? t('department_scope') : t('own_records');
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => 
@@ -57,7 +97,7 @@ export const UsersAccessPlaceholder: React.FC = () => {
         <div>
           <h4 className="text-sm font-bold text-blue-800">{t('user_management')}</h4>
           <p className="text-xs text-blue-700 mt-1 leading-relaxed">
-            {t('user_management_placeholder_desc')}
+            {t('rbac_active_desc')}
           </p>
         </div>
       </div>
@@ -143,28 +183,60 @@ export const UsersAccessPlaceholder: React.FC = () => {
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-border-base p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500">
+              <div className="w-8 h-8 rounded-lg bg-brand-muted-teal flex items-center justify-center text-brand-deep-teal">
                 <Key className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-text-primary text-sm">{t('role_permissions')}</h3>
+              <div>
+                <h3 className="font-bold text-text-primary text-sm">{t('role_permissions')}</h3>
+                <p className="text-[10px] text-text-secondary mt-0.5">{t('access_level')}</p>
+              </div>
             </div>
-            <div className="space-y-3">
-              {[
-                { key: 'system_admin', label: t('system_admin') },
-                { key: 'hr_manager', label: t('hr_manager') },
-                { key: 'hr_officer', label: t('hr_officer') },
-                { key: 'dept_head', label: t('dept_head') },
-                { key: 'occ_health_officer', label: t('occ_health_officer') }
-              ].map(role => (
-                <div key={role.key} className="flex items-center justify-between p-3 rounded-xl bg-bg-main/50 border border-border-base/50 hover:border-brand-primary-start/30 transition-colors group cursor-pointer">
-                  <span className="text-xs font-bold text-text-primary">{role.label}</span>
-                  <Shield className="w-3.5 h-3.5 text-text-secondary group-hover:text-brand-primary-start transition-colors" />
+
+            <div className="grid grid-cols-1 gap-2">
+              {ROLE_ORDER.map((role) => {
+                const isSelected = selectedRole === role;
+                return (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => setSelectedRole(role)}
+                    className={`flex items-center justify-between gap-3 rounded-xl border p-3 text-start transition-all ${
+                      isSelected
+                        ? 'border-brand-deep-teal bg-brand-muted-teal/60'
+                        : 'border-border-base/70 bg-bg-main/40 hover:border-brand-digital-teal/50'
+                    }`}
+                  >
+                    <span className="text-xs font-bold text-text-primary">{roleLabel(role)}</span>
+                    <span className="text-[10px] font-semibold text-text-secondary">
+                      {ROLE_ACCESS_POLICIES[role].modules.length} {t('modules_count')}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-5 border-t border-border-base pt-4">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <h4 className="text-sm font-bold text-brand-deep-teal">{roleLabel(selectedRole)}</h4>
+                  <p className="text-[10px] text-text-secondary mt-1">{selectedPolicy.modules.length} {t('modules_count')}</p>
                 </div>
-              ))}
+                <ShieldCheck className="w-5 h-5 text-brand-digital-teal shrink-0" />
+              </div>
+              <div className="space-y-2 max-h-80 overflow-y-auto pe-1 custom-scrollbar">
+                {selectedPolicy.modules.map((access) => (
+                  <div key={access.path} className="flex items-center justify-between gap-3 rounded-lg border border-border-base/70 px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-text-primary truncate">{moduleLabel(access.path)}</p>
+                      <p className="text-[10px] text-text-secondary">{t('role_scope')}: {scopeLabel(access.scope)}</p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-brand-muted-teal px-2 py-1 text-[10px] font-bold text-brand-deep-teal">
+                      {accessLabel(access.level)}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <button className="w-full mt-4 py-2 bg-bg-main border border-border-base rounded-xl text-xs font-bold text-text-secondary hover:bg-border-base transition-colors">
-              {t('manage_roles')}
-            </button>
           </div>
 
           <div className="bg-white rounded-2xl border border-border-base p-6 shadow-sm">
@@ -209,6 +281,10 @@ export const UsersAccessPlaceholder: React.FC = () => {
                   <option value="HR Manager">{t('hr_manager')}</option>
                   <option value="HR Officer">{t('hr_officer')}</option>
                   <option value="Department Head">{t('dept_head')}</option>
+                  <option value="Payroll Officer">{t('payroll_officer')}</option>
+                  <option value="Accountant">{t('accountant')}</option>
+                  <option value="Occupational Health Officer">{t('occ_health_officer')}</option>
+                  <option value="Employee">{t('employee')}</option>
                 </select>
               </div>
               <div className="space-y-1.5">
@@ -259,6 +335,10 @@ export const UsersAccessPlaceholder: React.FC = () => {
                     <option value="HR Manager">{t('hr_manager')}</option>
                     <option value="HR Officer">{t('hr_officer')}</option>
                     <option value="Department Head">{t('dept_head')}</option>
+                    <option value="Payroll Officer">{t('payroll_officer')}</option>
+                    <option value="Accountant">{t('accountant')}</option>
+                    <option value="Occupational Health Officer">{t('occ_health_officer')}</option>
+                    <option value="Employee">{t('employee')}</option>
                   </select>
                 </div>
                 <div className="space-y-1.5">

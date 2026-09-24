@@ -6,7 +6,7 @@ The Administration module is the central control hub for the OryxStaff system. I
 ## Main Pages/Components
 - **AdministrationView**: Main container with tabbed navigation for different admin functions.
 - **System Settings**: Placeholder for global system configurations.
-- **Users & Access**: Placeholder for user and role management.
+- **Users & Access**: Manage mock users and inspect the enforced role/module access matrix.
 - **Organizational Structure**: Placeholder for defining the hospital's hierarchy.
 - **Audit & Activity Log**: Implemented table showing a searchable record of administrative actions.
 
@@ -21,11 +21,11 @@ The Administration module is the central control hub for the OryxStaff system. I
 ## Current Mock/Scaffolded Behavior
 - **Data**: Audit logs are generated from `mockData.ts` within the module.
 - **State**: Tab selection is managed by local component state (`AdministrationView`).
-- **Placeholders**: Settings, Users, and Org Structure are currently non-functional UI placeholders.
+- **Placeholders**: System Settings and Org Structure remain scaffolded; Users & Access provides a functional demo RBAC matrix and role-scoped navigation.
 
 ## Known Limitations
 - System settings are not yet editable or persistent.
-- User management and role assignment are not implemented.
+- User management is mock-only and is not persisted to a backend.
 - Organizational structure visualization is a placeholder.
 
 ## Likely Future Backend/API Needs

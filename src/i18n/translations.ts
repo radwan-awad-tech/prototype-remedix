@@ -1076,6 +1076,13 @@ export type TranslationKey =
   | 'org_management'
   | 'privacy_settings'
   | 'role_permissions'
+  | 'rbac_active_desc'
+  | 'role_scope'
+  | 'access_level'
+  | 'organization_scope'
+  | 'department_scope'
+  | 'own_records'
+  | 'modules_count'
   | 'save_settings_success'
   | 'security_settings'
   | 'system_configuration'
@@ -1645,6 +1652,13 @@ export const translations: Record<Language, Record<string, string>> = {
     org_management: 'Organization Management',
     privacy_settings: 'Privacy Settings',
     role_permissions: 'Role Permissions',
+    rbac_active_desc: 'Role-based access is active. Screens and actions are filtered by role and data scope.',
+    role_scope: 'Data scope',
+    access_level: 'Access level',
+    organization_scope: 'Organization-wide',
+    department_scope: 'Own department',
+    own_records: 'Own records only',
+    modules_count: 'modules',
     save_settings_success: 'Settings saved successfully',
     security_settings: 'Security Settings',
     system_configuration: 'System Configuration',
@@ -3499,6 +3513,13 @@ export const translations: Record<Language, Record<string, string>> = {
     org_management: 'إدارة المؤسسة',
     privacy_settings: 'إعدادات الخصوصية',
     role_permissions: 'صلاحيات الأدوار',
+    rbac_active_desc: 'نظام الصلاحيات حسب الدور مفعّل. يتم تصفية الصفحات والإجراءات حسب الدور ونطاق البيانات.',
+    role_scope: 'نطاق البيانات',
+    access_level: 'مستوى الوصول',
+    organization_scope: 'على مستوى المؤسسة',
+    department_scope: 'القسم الخاص',
+    own_records: 'السجلات الشخصية فقط',
+    modules_count: 'وحدات',
     save_settings_success: 'تم حفظ الإعدادات بنجاح',
     security_settings: 'الإعدادات الأمنية',
     system_configuration: 'تكوين النظام',

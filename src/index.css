@@ -47,6 +47,7 @@
     @apply bg-bg-main text-text-primary antialiased;
     font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
     min-width: 320px;
+    cursor: url('/brand/remedix-cursor.svg') 3 2, auto;
   }
 
   h1,
@@ -64,6 +65,19 @@
   select,
   textarea {
     font: inherit;
+  }
+
+  button,
+  a,
+  select,
+  [role='button'] {
+    cursor: url('/brand/remedix-cursor.svg') 3 2, pointer;
+  }
+
+  input,
+  textarea,
+  [contenteditable='true'] {
+    cursor: text;
   }
 
   ::selection {
