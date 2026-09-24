@@ -35,6 +35,7 @@ export interface Role {
 
 export interface User {
   id: string;
+  employeeId?: string;
   name: string;
   email: string;
   role: RoleType;

@@ -138,6 +138,7 @@ export const EmployeesPage: React.FC = () => {
       </button>
       <button 
         onClick={() => setIsWizardOpen(true)}
+        hidden={user?.role !== 'HR Manager'}
         className="btn-gradient-primary flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
       >
         <Plus className="w-4 h-4" />
@@ -221,9 +222,9 @@ export const EmployeesPage: React.FC = () => {
               setIsTerminateModalOpen(true);
             },
             icon: <Trash2 size={14} />,
-            variant: 'danger'
+            variant: 'danger' as const
           }
-        ]}
+        ].filter(action => action.label !== t('terminate') || user?.role === 'HR Manager')}
       />
 
       {/* Profile Drawer */}
@@ -283,7 +284,8 @@ export const EmployeesPage: React.FC = () => {
             </button>
             <button 
               onClick={() => {
-                info(`Termination process initiated for ${employeeToTerminate?.firstName} ${employeeToTerminate?.lastName}`);
+                if (user?.role !== 'HR Manager') return;
+                info(t('feature_coming_soon'));
                 setIsTerminateModalOpen(false);
               }}
               className="flex-1 px-4 py-2 bg-rose-600 rounded-xl text-sm font-bold text-white hover:bg-rose-700 transition-colors"

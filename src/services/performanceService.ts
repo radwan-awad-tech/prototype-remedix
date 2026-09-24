@@ -1,10 +1,13 @@
+import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_EVALUATION_TEMPLATES, MOCK_EVALUATION_CYCLES, MOCK_EMPLOYEE_REVIEWS } from '../mockData';
 import { EvaluationTemplate, EvaluationCycle, EvaluationRecord, ApiResponse, EvaluationStatus } from '../types';
 import { apiClient } from './apiClient';
 
 let reviews = [...MOCK_EMPLOYEE_REVIEWS];
 
-export const performanceService = {
+const rawService = {
   listTemplates: async (): Promise<ApiResponse<EvaluationTemplate[]>> => {
     return apiClient.get(MOCK_EVALUATION_TEMPLATES);
   },
@@ -94,3 +97,10 @@ export const performanceService = {
     return apiClient.get(data);
   }
 };
+
+export const performanceService = secureService('/performance', rawService, {
+listTemplates: { metadata: true }, listCycles: { metadata: true }, listReviews: {},
+ createTemplate: { roles: ['HR Manager'] }, updateTemplateStatus: { roles: ['HR Manager'] },
+ submitReview: { roles: ['HR Manager','Department Head'], target: id => reviews.find(r => r.id === id), validate: (u,id,d) => { const r = reviews.find(r => r.id === id); return !!r && r.status !== 'Finalized' && r.employeeId !== u.employeeId && !['id','employeeId','department','evaluatorId','cycleId'].some(k => k in d && d[k] !== r[k]); } },
+ getPerformanceAnalytics: { roles: ['HR Manager'] }
+});

@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '../../types';
+import { User, RoleType } from '../../types';
+
+import { demoIdentity, setSessionActor } from './session';
+import { ROLE_ORDER } from './permissions';
 
 interface AuthContextType {
   user: User | null;
@@ -25,9 +28,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (savedToken && savedUser) {
         const parsedUser = JSON.parse(savedUser);
-        if (parsedUser && typeof parsedUser === 'object') {
+        if (parsedUser && ROLE_ORDER.includes(parsedUser.role) && typeof parsedUser.name === 'string') {
+          const restored = demoIdentity(parsedUser.name, parsedUser.role);
+          setSessionActor(restored);
           setToken(savedToken);
-          setUser(parsedUser);
+          setUser(restored);
         } else {
           // Corrupted session
           localStorage.removeItem('auth_token');
@@ -45,13 +50,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (username: string, role: string, department?: string) => {
     // Mock login logic
-    const mockUser: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: username,
-      email: `${username.toLowerCase().replace(/\s+/g, '.')}@medistaff.com`,
-      role: role as any,
-      department: department || (role === 'Department Head' ? 'Nursing' : undefined),
-    };
+    const mockUser = demoIdentity(username, role as RoleType);
+    setSessionActor(mockUser);
     const mockToken = 'mock-jwt-token-' + Date.now();
 
     setToken(mockToken);
@@ -62,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    setSessionActor(null);
     setToken(null);
     setUser(null);
     localStorage.removeItem('auth_token');

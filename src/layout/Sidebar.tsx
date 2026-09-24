@@ -45,7 +45,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole, currentUser, acti
     return items
       .filter(item => {
         // Check explicit roles if defined
-        if (item.roles && !item.roles.includes(currentRole)) return false;
         // Groups are containers; only leaf routes need a permission check.
         if (!item.children && !canAccessPath(currentRole, item.path)) return false;
         return true;
@@ -117,6 +116,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole, currentUser, acti
 
         {/* Footer Actions */}
         <div className="p-4 border-t border-border-base space-y-2">
+          <button onClick={() => onNavigate('/access')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-brand-deep-teal hover:bg-bg-main" title={isRTL ? 'دليل الصلاحيات' : 'Role access guide'}>
+            <ShieldCheck className="w-5 h-5 shrink-0" />
+            {!isCollapsed && <span className="text-sm font-medium">{isRTL ? 'دليل الصلاحيات' : 'Role access guide'}</span>}
+          </button>
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2 rounded-lg text-text-secondary hover:bg-bg-main transition-colors`}

@@ -1,10 +1,11 @@
+import { secureService, HR } from './accessGuard';
 import { MOCK_DOCUMENTS } from '../mockData';
 import { Document, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
 let documents = [...MOCK_DOCUMENTS];
 
-export const documentService = {
+const rawService = {
   listDocuments: async (): Promise<ApiResponse<Document[]>> => {
     return apiClient.get([...documents]);
   },
@@ -27,3 +28,6 @@ export const documentService = {
     return apiClient.delete(undefined, 500);
   }
 };
+
+// Legacy unscoped dashboard/report endpoints are retired; workspaceService is the authorized replacement.
+export const documentService = secureService('/employees', rawService, {listDocuments: { roles: HR }, uploadDocument: { roles: HR }, deleteDocument: { roles: ['HR Manager'] }});

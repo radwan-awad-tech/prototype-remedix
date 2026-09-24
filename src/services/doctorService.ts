@@ -1,8 +1,11 @@
+import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_DOCTORS, MOCK_EMPLOYEES } from '../mockData';
 import { Doctor, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
-export const doctorService = {
+const rawService = {
   listDoctors: async (department?: string): Promise<ApiResponse<Doctor[]>> => {
     let data = [...MOCK_DOCTORS];
     if (department) {
@@ -19,3 +22,7 @@ export const doctorService = {
     return apiClient.get(doctor);
   }
 };
+
+export const doctorService = secureService('/doctors', rawService, {
+listDoctors: {}, getDoctor: {}
+});

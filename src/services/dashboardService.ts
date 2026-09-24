@@ -1,3 +1,4 @@
+import { secureService, HR } from './accessGuard';
 import { 
   MOCK_ALERTS, 
   MOCK_APPROVALS, 
@@ -15,7 +16,7 @@ import { apiClient } from './apiClient';
 let approvals = [...MOCK_APPROVALS];
 let alerts = [...MOCK_ALERTS];
 
-export const dashboardService = {
+const rawService = {
   listAlerts: async (department?: string): Promise<ApiResponse<Alert[]>> => {
     let filteredAlerts = [...alerts];
     if (department) {
@@ -249,3 +250,6 @@ export const dashboardService = {
     return apiClient.error('Approval request not found', 404);
   }
 };
+
+// Legacy unscoped dashboard/report endpoints are retired; workspaceService is the authorized replacement.
+export const dashboardService = secureService('/', rawService, {});

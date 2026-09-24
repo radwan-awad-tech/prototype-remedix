@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useSettings } from '../../context/SettingsContext';
 import { ForceLTR } from '../../components/ForceLTR';
+import { ROLE_PROFILES } from './permissions';
+import { RoleType } from '../../types';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -33,6 +35,7 @@ export const LoginPage: React.FC = () => {
     { id: 'Employee', translationKey: 'employee' as const }
   ];
 
+  const roleProfile = ROLE_PROFILES[selectedRole as RoleType];
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -206,6 +209,8 @@ export const LoginPage: React.FC = () => {
                         <option key={role.id} value={role.id}>{t(role.translationKey)}</option>
                       ))}
                     </select>
+                    <p className="text-xs leading-6 text-text-secondary rounded-lg bg-bg-main p-3">{language === 'ar' ? `${roleProfile.authority}. ${roleProfile.limits}` : roleProfile.en}</p>
+                    <p className="text-xs text-amber-800">{language === 'ar' ? 'اختيار الدور للتجربة فقط، وليس تسجيل دخول آمناً. الموظف التجريبي مرتبط بالسجل 3 ورئيس القسم بالسجل 2 / التمريض.' : 'Demo role picker, not secure authentication. Employee maps to record 3; department head to record 2 / Nursing.'}</p>
                   </div>
 
                   <div className="flex items-center">

@@ -1,8 +1,13 @@
+import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_PAYROLL_RUNS, MOCK_PAYROLL_COMPONENTS, MOCK_PAYROLL_RULES, MOCK_PAYROLL_REVIEWS, MOCK_PAYSLIPS, MOCK_EMPLOYEES, MOCK_PAYROLL_PROFILES } from '../mockData';
 import { PayrollRun, PayrollComponent, PayrollRule, PayrollItem, Payslip, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
-export const payrollService = {
+const preparers = new Map<string, string>();
+
+const rawService = {
   listRuns: async (): Promise<ApiResponse<PayrollRun[]>> => {
     return apiClient.get(MOCK_PAYROLL_RUNS);
   },
@@ -50,6 +55,7 @@ export const payrollService = {
       totalNet: 0,
       createdAt: new Date().toISOString(),
     };
+    preparers.set(newRun.id, getSessionActor()!.id);
     MOCK_PAYROLL_RUNS.unshift(newRun);
     return apiClient.post(newRun, 500);
   },
@@ -61,6 +67,7 @@ export const payrollService = {
     }
 
     const run = MOCK_PAYROLL_RUNS[runIndex];
+    preparers.set(runId, getSessionActor()!.id);
     let totalBaseSalary = 0;
     let totalAllowances = 0;
     let totalDeductions = 0;
@@ -132,6 +139,7 @@ export const payrollService = {
     MOCK_PAYROLL_RUNS[runIndex] = {
       ...run,
       status: 'Calculated',
+      employeeCount: MOCK_PAYROLL_REVIEWS.filter(r => r.runId === runId).length,
       totalBaseSalary,
       totalAllowances,
       totalDeductions,
@@ -176,7 +184,7 @@ export const payrollService = {
       ...run,
       status: 'Approved',
       approvedAt: new Date().toISOString(),
-      approvedBy: 'Admin',
+      approvedBy: getSessionActor()!.id,
     };
 
     // Generate payslips
@@ -201,3 +209,13 @@ export const payrollService = {
     return apiClient.put(undefined, 500);
   }
 };
+
+export const payrollService = secureService('/payroll', rawService, {
+listRuns: { roles: FINANCE }, listComponents: { roles: FINANCE }, listRules: { roles: FINANCE }, listReviews: { roles: FINANCE },
+ getPayslip: {}, listPayslips: {},
+ createRun: { roles: ['Payroll Officer'], validate: (u,period) => /^\d{4}-(0[1-9]|1[0-2])$/.test(period) && !MOCK_PAYROLL_RUNS.some(r => r.period === period) },
+ calculateRun: { roles: ['Payroll Officer'], validate: (u,id) => ['Draft','Calculated'].includes(MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status || '') },
+ lockRun: { roles: ['Payroll Officer'], validate: (u,id) => MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status === 'Calculated' },
+ unlockRun: { roles: ['Payroll Officer'], validate: (u,id) => MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status === 'Locked' },
+ approveRun: { roles: ['Accountant'], validate: (u,id) => { const r = MOCK_PAYROLL_RUNS.find(r => r.id === id); return r?.status === 'Locked' && !!preparers.get(id) && preparers.get(id) !== u.id; } }
+});

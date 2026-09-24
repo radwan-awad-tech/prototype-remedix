@@ -1,10 +1,14 @@
+import { secureService, HR, setEmployeeDirectory } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_EMPLOYEES } from '../mockData';
 import { Employee, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
 let employees = [...MOCK_EMPLOYEES];
+setEmployeeDirectory(() => employees);
 
-export const employeeService = {
+const rawService = {
   listEmployees: async (department?: string): Promise<ApiResponse<Employee[]>> => {
     let data = [...employees];
     if (department) {
@@ -42,3 +46,8 @@ export const employeeService = {
     return apiClient.put(employees[index], 500);
   }
 };
+
+export const employeeService = secureService('/employees', rawService, {
+listEmployees: {}, getEmployee: {}, createEmployee: { roles: ['HR Manager'] },
+ updateEmployee: { roles: HR, target: id => employees.find(e => e.id === id), validate: (u, id, d) => !('id' in d) && (u.role === 'HR Manager' || !['status','role','department','position','supervisorId','contractType','hireDate'].some(k => k in d)) }
+});

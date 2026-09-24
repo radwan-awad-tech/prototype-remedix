@@ -1,3 +1,6 @@
+import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_JOB_OPENINGS, MOCK_CANDIDATES, MOCK_INTERVIEWS, MOCK_OFFERS } from '../mockData';
 import { JobOpening, Candidate, Interview, Offer, JobOpeningStatus, CandidateStage, InterviewOutcome, OfferStatus, ApiResponse } from '../types';
 import { employeeService } from './employeeService';
@@ -9,7 +12,7 @@ let candidates = [...MOCK_CANDIDATES];
 let interviews = [...MOCK_INTERVIEWS];
 let offers = [...MOCK_OFFERS];
 
-export const recruitmentService = {
+const rawService = {
   // Job Openings
   listJobOpenings: async (department?: string): Promise<ApiResponse<JobOpening[]>> => {
     let data = [...jobOpenings];
@@ -170,3 +173,11 @@ export const recruitmentService = {
     return apiClient.error('Candidate not found', 404);
   }
 };
+
+export const recruitmentService = secureService('/recruitment', rawService, {
+listJobOpenings: {}, listCandidates: {}, listInterviews: {}, listOffers: { roles: HR },
+ createJobOpening: { roles: HR }, updateJobOpeningStatus: { roles: ['HR Manager'] },
+ addCandidate: { roles: HR }, updateCandidateStage: { roles: HR, validate: (u,id,stage) => stage !== 'Hired' && (u.role === 'HR Manager' || stage !== 'Offered') },
+ scheduleInterview: { roles: HR }, recordInterviewOutcome: { roles: ['HR Manager','HR Officer','Department Head'], target: id => interviews.find(i => i.id === id) },
+ generateOffer: { roles: HR }, updateOfferStatus: { roles: ['HR Manager'] }, convertCandidateToEmployee: { roles: ['HR Manager'] }
+});

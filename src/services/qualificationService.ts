@@ -1,8 +1,11 @@
+import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_QUALIFICATIONS } from '../mockData';
 import { Qualification, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
-export const qualificationService = {
+const rawService = {
   listQualifications: async (department?: string): Promise<ApiResponse<Qualification[]>> => {
     let data = [...MOCK_QUALIFICATIONS];
     if (department) {
@@ -29,3 +32,7 @@ export const qualificationService = {
     return apiClient.post(newQual, 500);
   }
 };
+
+export const qualificationService = secureService('/licenses', rawService, {
+listQualifications: {}, verifyQualification: { roles: HR }, rejectQualification: { roles: HR }, addQualification: { roles: HR }
+});

@@ -2,6 +2,7 @@ import { Incident, Vaccination, MedicalCheckup, FollowUp, OHRole } from '../modu
 import { MOCK_INCIDENTS, MOCK_VACCINATIONS, MOCK_CHECKUPS, MOCK_FOLLOW_UPS } from '../modules/occupationalHealth/mockData';
 import { User, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
+import { getSessionActor } from '../modules/auth/session';
 
 class OccupationalHealthService {
   private filterByRole<T extends { employeeId: string; department: string }>(
@@ -9,13 +10,11 @@ class OccupationalHealthService {
     user: User,
     ohRole: OHRole
   ): T[] {
-    if (ohRole === 'OHO' || ohRole === 'HR_COMPLIANCE' || user.role === 'System Admin') {
+    if (getSessionActor()?.role === 'Occupational Health Officer' && getSessionActor()?.status !== 'inactive') {
       return data;
     }
-    if (ohRole === 'DEPT_HEAD') {
-      return data.filter(item => item.department === user.department);
-    }
-    return data.filter(item => item.employeeId === user.id);
+    // Medical records never leave this service for HR or managers, even with a forged ohRole.
+    return [];
   }
 
   async getIncidents(user: User, ohRole: OHRole): Promise<ApiResponse<Incident[]>> {
@@ -39,6 +38,7 @@ class OccupationalHealthService {
   }
 
   async reportIncident(incident: Partial<Incident>): Promise<ApiResponse<Incident>> {
+    if (getSessionActor()?.role !== 'Occupational Health Officer' || getSessionActor()?.status === 'inactive') return apiClient.error('Access denied', 403);
     const newIncident = {
       ...incident,
       id: `INC-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
@@ -49,6 +49,7 @@ class OccupationalHealthService {
   }
 
   async addVaccination(vaccination: Partial<Vaccination>): Promise<ApiResponse<Vaccination>> {
+    if (getSessionActor()?.role !== 'Occupational Health Officer' || getSessionActor()?.status === 'inactive') return apiClient.error('Access denied', 403);
     const newVaccination = {
       ...vaccination,
       id: `VAC-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
@@ -58,6 +59,7 @@ class OccupationalHealthService {
   }
 
   async scheduleCheckup(checkup: Partial<MedicalCheckup>): Promise<ApiResponse<MedicalCheckup>> {
+    if (getSessionActor()?.role !== 'Occupational Health Officer' || getSessionActor()?.status === 'inactive') return apiClient.error('Access denied', 403);
     const newCheckup = {
       ...checkup,
       id: `CHK-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,

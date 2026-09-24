@@ -1,8 +1,9 @@
+import { secureService, HR } from './accessGuard';
 import { MOCK_REPORT_TEMPLATES, MOCK_REPORT_HISTORY } from '../mockData';
 import { ReportTemplate, ReportRun, ReportFilters, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
-export const reportService = {
+const rawService = {
   listTemplates: async (): Promise<ApiResponse<ReportTemplate[]>> => {
     return apiClient.get(MOCK_REPORT_TEMPLATES);
   },
@@ -34,3 +35,6 @@ export const reportService = {
     return apiClient.get(undefined, 500);
   }
 };
+
+// Legacy unscoped dashboard/report endpoints are retired; workspaceService is the authorized replacement.
+export const reportService = secureService('/reports', rawService, {});

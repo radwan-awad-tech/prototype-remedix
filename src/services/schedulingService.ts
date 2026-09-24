@@ -1,10 +1,13 @@
+import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_SHIFT_TYPES, MOCK_SHIFT_ASSIGNMENTS, MOCK_POLICIES } from '../mockData';
 import { ShiftType, ScheduleAssignment, WorkingHoursPolicy, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
 let assignments = [...MOCK_SHIFT_ASSIGNMENTS];
 
-export const schedulingService = {
+const rawService = {
   listShiftTypes: async (): Promise<ApiResponse<ShiftType[]>> => {
     return apiClient.get(MOCK_SHIFT_TYPES);
   },
@@ -66,3 +69,11 @@ export const schedulingService = {
     return apiClient.post(newPolicy, 500);
   }
 };
+
+export const schedulingService = secureService('/scheduling', rawService, {
+listShiftTypes: { metadata: true }, listPolicies: { metadata: true }, listScheduleAssignments: {},
+ createScheduleAssignment: { roles: ['HR Manager','Department Head'], target: d => d, validate: (u,d) => !!d.employeeId && withinScope(u, '/scheduling', scopedRow(d,'/scheduling')) },
+ updateScheduleAssignment: { roles: ['HR Manager','Department Head'], target: id => assignments.find(a => a.id === id), validate: (u,id,d) => !('id' in d) && withinScope(u, '/scheduling', scopedRow({...assignments.find(a => a.id === id),...d},'/scheduling')) },
+ deleteScheduleAssignment: { roles: ['HR Manager','Department Head'], target: id => assignments.find(a => a.id === id) },
+ createShiftType: { roles: ['HR Manager'] }, createPolicy: { roles: ['HR Manager'] }
+});

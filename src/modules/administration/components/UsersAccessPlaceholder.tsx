@@ -5,6 +5,7 @@ import { mockAdminUsers } from '../mockData';
 import { AdminUser } from '../types';
 import { RoleType } from '../../../types';
 import { ROLE_ACCESS_POLICIES, ROLE_ORDER } from '../../auth/permissions';
+import { MODULE_NAMES } from '../../../pages/RoleAccess';
 import { Drawer } from '../../../components/ui/Drawer';
 import { useToast } from '../../../components/ui/Toast';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
@@ -39,8 +40,8 @@ const MODULE_TRANSLATION_KEYS: Record<string, string> = {
 };
 
 export const UsersAccessPlaceholder: React.FC = () => {
-  const { t } = useTranslation();
-  const { success } = useToast();
+  const { t, language } = useTranslation();
+  const { info } = useToast();
   const [users, setUsers] = useState<AdminUser[]>(mockAdminUsers);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
@@ -51,8 +52,8 @@ export const UsersAccessPlaceholder: React.FC = () => {
   const selectedPolicy = ROLE_ACCESS_POLICIES[selectedRole];
 
   const roleLabel = (role: RoleType) => t(ROLE_TRANSLATION_KEYS[role] as any);
-  const moduleLabel = (path: string) => t(MODULE_TRANSLATION_KEYS[path] as any);
-  const accessLabel = (level: string) => level === 'manage' ? t('full_access') : level === 'review' ? t('approval_review') : t('view');
+  const moduleLabel = (path: string) => MODULE_NAMES[path]?.[language === 'ar' ? 0 : 1] || path;
+  const accessLabel = (level: string) => level === 'manage' ? (language === 'ar' ? 'إجراءات محددة' : 'Scoped actions') : level === 'review' ? t('approval_review') : t('view');
   const scopeLabel = (scope: string) => scope === 'organization'
     ? t('organization_scope')
     : scope === 'department' ? t('department_scope') : t('own_records');
@@ -71,7 +72,7 @@ export const UsersAccessPlaceholder: React.FC = () => {
     setTimeout(() => {
       setIsSaving(false);
       setIsAddDrawerOpen(false);
-      success(t('user_created_success'));
+      info(language === 'ar' ? 'هذه معاينة فقط؛ إنشاء الحساب الحقيقي غير مربوط بخادم بعد.' : 'Preview only; real account provisioning is not connected yet.');
     }, 1000);
   };
 
@@ -81,7 +82,7 @@ export const UsersAccessPlaceholder: React.FC = () => {
     setTimeout(() => {
       setIsSaving(false);
       setIsEditDrawerOpen(false);
-      success(t('settings_saved_success'));
+      info(language === 'ar' ? 'هذه معاينة فقط؛ لم تتغير صلاحيات حساب فعلي.' : 'Preview only; no real account permissions were changed.');
     }, 1000);
   };
 
@@ -97,7 +98,7 @@ export const UsersAccessPlaceholder: React.FC = () => {
         <div>
           <h4 className="text-sm font-bold text-blue-800">{t('user_management')}</h4>
           <p className="text-xs text-blue-700 mt-1 leading-relaxed">
-            {t('rbac_active_desc')}
+            {language === 'ar' ? 'صلاحيات الواجهات والخدمات التجريبية حسب الدور. إدارة الحسابات هنا معاينة فقط ولا تغيّر هوية تسجيل الدخول. يلزم خادم ومصادقة حقيقية قبل الاستخدام الفعلي.' : 'Demo routes and services are role-scoped. Account forms are previews only and do not change login identities. A backend and real authentication are required before production use.'}
           </p>
         </div>
       </div>

@@ -1,10 +1,13 @@
+import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_ATTENDANCE, MOCK_ATTENDANCE_CORRECTIONS } from '../mockData';
 import { AttendanceRecord, AttendanceCorrection, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
 let corrections = [...MOCK_ATTENDANCE_CORRECTIONS];
 
-export const attendanceService = {
+const rawService = {
   listAttendanceRecords: async (date?: string, department?: string): Promise<ApiResponse<AttendanceRecord[]>> => {
     let data = [...MOCK_ATTENDANCE];
     if (department) {
@@ -26,6 +29,8 @@ export const attendanceService = {
       ...data, 
       id: `AC-${Math.floor(Math.random() * 1000)}`,
       status: 'Pending',
+      stage: 'Manager',
+      submittedAt: new Date().toISOString(),
       createdAt: new Date().toISOString()
     } as AttendanceCorrection;
     corrections.unshift(newRequest);
@@ -37,7 +42,7 @@ export const attendanceService = {
     if (index === -1) {
       return apiClient.error('Correction not found', 404);
     }
-    corrections[index] = { ...corrections[index], status: 'Approved' };
+    corrections[index] = { ...corrections[index], status: getSessionActor()!.role === 'Department Head' ? 'Pending' : 'Approved', stage: getSessionActor()!.role === 'Department Head' ? 'HR' : 'Completed' };
     return apiClient.put(undefined, 500);
   },
 
@@ -46,7 +51,7 @@ export const attendanceService = {
     if (index === -1) {
       return apiClient.error('Correction not found', 404);
     }
-    corrections[index] = { ...corrections[index], status: 'Rejected' };
+    corrections[index] = { ...corrections[index], status: 'Rejected', stage: 'Completed', rejectionReason: reason };
     return apiClient.put(undefined, 500);
   },
 
@@ -103,3 +108,11 @@ export const attendanceService = {
     return apiClient.get(summaryData);
   }
 };
+
+export const attendanceService = secureService('/attendance', rawService, {
+listAttendanceRecords: {}, listAttendanceCorrections: {},
+ createAttendanceCorrection: { roles: ['HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => !!u.employeeId && d.employeeId === u.employeeId },
+ approveCorrection: { roles: ['HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },
+ rejectCorrection: { roles: ['HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },
+ createAttendanceRecord: { roles: ['HR Manager'] }, getAttendanceSummary: { roles: ['HR Manager','HR Officer'] }
+});

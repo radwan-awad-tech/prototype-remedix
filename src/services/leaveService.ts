@@ -1,3 +1,6 @@
+import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { withinScope } from '../modules/auth/permissions';
+import { getSessionActor } from '../modules/auth/session';
 import { MOCK_LEAVE_REQUESTS, MOCK_LEAVE_BALANCES } from '../mockData';
 import { LeaveRequest, LeaveBalance, LeavePolicy, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
@@ -11,7 +14,7 @@ const MOCK_LEAVE_POLICIES: LeavePolicy[] = [
   { id: 'lp-4', leaveType: 'Unpaid', annualEntitlement: 0, maxCarryOver: 0, minNoticeDays: 7, requiresAttachment: false, isPaid: false, description: 'Leave without pay.' },
 ];
 
-export const leaveService = {
+const rawService = {
   listLeaveRequests: async (department?: string): Promise<ApiResponse<LeaveRequest[]>> => {
     let data = [...leaveRequests];
     if (department) {
@@ -37,6 +40,8 @@ export const leaveService = {
       ...data, 
       id: `LR-${Math.floor(Math.random() * 1000)}`,
       status: 'Pending',
+      stage: 'Manager',
+      submittedAt: new Date().toISOString(),
       createdAt: new Date().toISOString()
     } as LeaveRequest;
     leaveRequests.unshift(newRequest);
@@ -48,7 +53,15 @@ export const leaveService = {
     if (index === -1) {
       return apiClient.error('Leave request not found', 404);
     }
-    leaveRequests[index] = { ...leaveRequests[index], status };
+    const actor = getSessionActor()!;
+    const managerStage = actor.role === 'Department Head' && status === 'Approved';
+    leaveRequests[index] = { ...leaveRequests[index], status: managerStage ? 'Pending' : status, stage: managerStage ? 'HR' : 'Completed', ...(actor.role === 'Department Head' ? { managerApprovedBy: actor.id, managerApprovedAt: new Date().toISOString() } : { hrApprovedBy: actor.id, hrApprovedAt: new Date().toISOString() }), ...(status === 'Rejected' ? { rejectionReason: reason } : {}) };
     return apiClient.put(undefined, 500);
   }
 };
+
+export const leaveService = secureService('/leaves', rawService, {
+listLeaveRequests: {}, listLeaveBalances: {}, listLeavePolicies: { metadata: true },
+ createLeaveRequest: { roles: ['HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => !!u.employeeId && d.employeeId === u.employeeId },
+ updateLeaveStatus: { roles: ['HR Manager','Department Head'], target: id => leaveRequests.find(r => r.id === id), validate: (u,id,status) => { const r = leaveRequests.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && ['Approved','Rejected'].includes(status) && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } }
+});

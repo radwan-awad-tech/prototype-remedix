@@ -22,6 +22,9 @@ import { AccessDeniedPage } from './modules/auth/AccessDeniedPage';
 import { canAccessPath, getLandingPath } from './modules/auth/permissions';
 import { AppShell } from './layout/AppShell';
 import { ToastProvider } from './components/ui/Toast';
+import { ScopedWorkspace } from './pages/ScopedWorkspace';
+import { RoleAccessPage } from './pages/RoleAccess';
+import { getModuleAccess } from './modules/auth/permissions';
 
 const AppContent = () => {
   const { currentPath, navigate } = useNavigation();
@@ -63,6 +66,11 @@ const AppContent = () => {
       );
     }
 
+    if (currentPath === '/access') return <RoleAccessPage />;
+    if (['/', '/reports', '/payroll', '/leaves', '/attendance'].includes(currentPath) ||
+      (!['/settings', '/profile', '/admin'].includes(currentPath) && getModuleAccess(user.role, currentPath)?.level !== 'manage')) {
+      return <ScopedWorkspace key={`${user.id}:${currentPath}`} path={currentPath} />;
+    }
     switch (currentPath) {
       case '/': return <DashboardPage />;
       case '/employees': return <EmployeesPage />;
@@ -81,7 +89,7 @@ const AppContent = () => {
       case '/profile': return <ProfilePage />;
       default: return <DashboardPage />;
     }
-  }, [currentPath, user, previousPath]);
+  }, [currentPath, user, previousPath, isRedirecting]);
 
   if (isLoading) {
     return (
@@ -100,7 +108,7 @@ const AppContent = () => {
       user={user}
       activePath={currentPath}
       onNavigate={handleNavigate}
-      onLogout={logout}
+      onLogout={() => { logout(); navigate('/'); }}
     >
       {renderPage}
     </AppShell>
