@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { 
   UserCheck, 
   AlertTriangle, 
@@ -12,7 +12,6 @@ import {
   RefreshCw,
   Database,
   FileText,
-  Brain
 } from 'lucide-react';
 import { 
   XAxis, 
@@ -25,7 +24,6 @@ import {
 } from 'recharts';
 import { useTranslation } from '../../hooks/useTranslation';
 import { TranslationKey } from '../../i18n/translations';
-import { aiModelService } from '../../services/aiModelService';
 
 // --- IMPROVED SYNTHETIC DATA GENERATOR ---
 const generateHospitalEnvironment = (mode = 'normal') => {
@@ -77,108 +75,24 @@ export const AIScheduling: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(data.demand[0].date);
   const [nurseRatio, setNurseRatio] = useState(4);
   const [view, setView] = useState('dashboard'); // 'dashboard' or 'data'
-  const [aiModelsLoaded, setAiModelsLoaded] = useState(false);
-  const [modelInfo, setModelInfo] = useState<any>(null);
-  const [isProcessingAI, setIsProcessingAI] = useState(false);
-
-  // Initialize AI models on component mount
-  useEffect(() => {
-    const initializeAIModels = async () => {
-      try {
-        setIsProcessingAI(true);
-        
-        // Validate model files
-        const validation = await aiModelService.validateModelFiles();
-        if (!validation.success) {
-          console.error('Model validation failed:', validation.error);
-          return;
-        }
-
-        // Load AI models
-        const [patientsModel, absenceModel] = await Promise.all([
-          aiModelService.loadPatientsCountModel(),
-          aiModelService.loadAbsencePredictionModel()
-        ]);
-
-        if (patientsModel.success && absenceModel.success) {
-          setModelInfo({
-            patientsCountModel: patientsModel.data,
-            absencePredictionModel: absenceModel.data,
-            paths: validation.data?.paths
-          });
-          setAiModelsLoaded(true);
-        }
-      } catch (error) {
-        console.error('Failed to initialize AI models:', error);
-      } finally {
-        setIsProcessingAI(false);
-      }
-    };
-
-    initializeAIModels();
-  }, []);
-
-  const refreshData = async (mode: string) => {
+  const refreshData = (mode: string) => {
     const newData = generateHospitalEnvironment(mode);
     setData(newData);
     setSelectedDate(newData.demand[0].date);
     setEnvMode(mode);
 
-    // If AI models are loaded, get real predictions
-    if (aiModelsLoaded) {
-      try {
-        setIsProcessingAI(true);
-        
-        // Get AI predictions for patient count
-        const patientPredictions = await Promise.all(
-          newData.demand.map(day => 
-            aiModelService.predictPatientCount(day.date, [])
-          )
-        );
-
-        // Get AI predictions for staff absence
-        const staffPredictions = await aiModelService.predictStaffAbsence(newData.staff);
-
-        // Update data with AI predictions if successful
-        if (patientPredictions.every(p => p.success) && staffPredictions.success) {
-          const updatedDemand = newData.demand.map((day, index) => ({
-            ...day,
-            patients: patientPredictions[index].data?.predictedPatients || day.patients,
-            aiConfidence: patientPredictions[index].data?.confidence || 0.85
-          }));
-
-          const updatedStaff = newData.staff.map((staff, index) => ({
-            ...staff,
-            aiAbsenceRisk: staffPredictions.data[index]?.predictedAbsenceRisk || 0.1,
-            aiConfidence: staffPredictions.data[index]?.confidence || 0.85
-          }));
-
-          setData({ staff: updatedStaff, demand: updatedDemand });
-        }
-      } catch (error) {
-        console.error('Failed to get AI predictions:', error);
-      } finally {
-        setIsProcessingAI(false);
-      }
-    }
   };
 
-  // Model Logic Simulation
+  // Demo-only scheduling estimate using synthetic data; not an operational recommendation.
   const currentDayData = data.demand.find(d => d.date === selectedDate) || data.demand[0];
   const requiredStaffCount = Math.ceil(currentDayData.patients / nurseRatio);
 
   const calculateRisk = useCallback((member) => {
-    // Use AI prediction if available, otherwise fall back to simulation
-    if (aiModelsLoaded && member.aiAbsenceRisk !== undefined) {
-      return member.aiAbsenceRisk.toFixed(2);
-    }
-    
-    // Fallback to simulation
     const distanceWeight = member.distance / 120;
     const isWeekend = currentDayData.day === 'Sat' || currentDayData.day === 'Sun' ? 0.18 : 0;
     const randomNoise = Math.random() * 0.08;
     return Math.min(0.98, distanceWeight + isWeekend + randomNoise).toFixed(2);
-  }, [currentDayData, aiModelsLoaded]);
+  }, [currentDayData]);
 
   const staffWithRisk = useMemo(() => {
     return data.staff.map(s => ({ ...s, currentRisk: calculateRisk(s) }))
@@ -195,34 +109,24 @@ export const AIScheduling: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <Activity className="text-brand-primary-start" />
-            AI Staff Scheduling
+            Staff Scheduling Demo
           </h1>
-          <p className="text-text-secondary text-sm">Smart scheduling powered by AI predictions</p>
+          <p className="text-text-secondary text-sm">Interactive simulation using synthetic sample data only</p>
         </div>
 
         <div className="flex items-center gap-3 card-base p-2">
           <div className="flex items-center gap-2">
-            {aiModelsLoaded ? (
-              <div className="flex items-center gap-1 text-emerald-600">
-                <div className="w-2 h-2 bg-emerald-600 rounded-full animate-pulse"></div>
-                <span className="text-xs font-medium">AI Active</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 text-amber-600">
-                <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
-                <span className="text-xs font-medium">
-                  {isProcessingAI ? 'Loading AI...' : 'AI Standby'}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-1 text-amber-600">
+              <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
+              <span className="text-xs font-medium">Demo data</span>
+            </div>
           </div>
           <div className="flex gap-1 border-r border-border-base pr-3 mr-1">
             {['normal', 'crisis', 'remote'].map((m) => (
               <button
                 key={m}
                 onClick={() => refreshData(m)}
-                disabled={isProcessingAI}
-                className={`p-1.5 rounded-md transition ${envMode === m ? 'bg-brand-primary-start/10 text-brand-primary-start' : 'text-text-secondary hover:bg-bg-main'} ${isProcessingAI ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`p-1.5 rounded-md transition ${envMode === m ? 'bg-brand-primary-start/10 text-brand-primary-start' : 'text-text-secondary hover:bg-bg-main'}`}
                 title={`Load ${m} scenario`}
               >
                 <RefreshCw size={16} className={envMode === m ? 'animate-spin-slow' : ''} />
@@ -527,32 +431,11 @@ export const AIScheduling: React.FC = () => {
           </div>
           
           <div className="mt-8 space-y-4">
-            {modelInfo && (
-              <div className="p-4 bg-gradient-primary/10 rounded-xl border border-brand-primary-start/20">
-                <h4 className="text-sm font-bold text-brand-primary-start mb-3 flex items-center gap-2">
-                  <Brain size={16} />
-                  AI Model Information
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs font-bold text-text-secondary mb-1">Patients Count Model</p>
-                    <p className="text-[10px] text-text-primary font-mono">{modelInfo.paths?.patientsCountModel}</p>
-                    <p className="text-[10px] text-text-secondary">Accuracy: {((modelInfo.patientsCountModel?.accuracy || 0) * 100).toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-text-secondary mb-1">Staff Absence Model</p>
-                    <p className="text-[10px] text-text-primary font-mono">{modelInfo.paths?.absencePredictionModel}</p>
-                    <p className="text-[10px] text-text-secondary">Accuracy: {((modelInfo.absencePredictionModel?.accuracy || 0) * 100).toFixed(1)}%</p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
             <div className="p-4 bg-brand-primary-start/10 rounded-xl border border-brand-primary-start/20">
               <p className="text-xs text-brand-primary-start leading-relaxed font-medium">
                 <strong>How to test:</strong> Use the refresh icons in the header to switch between "Normal", "Crisis", and "Remote" modes. Notice how the 
                 <strong> Distance</strong> values change in "Remote" mode and <strong>Patient Count</strong> surges in "Crisis" mode. 
-                The AI Dashboard will react in real-time to these raw data changes.
+                All values are synthetic examples for interface testing only; they are not predictions and must not guide staffing or patient-care decisions.
               </p>
             </div>
           </div>

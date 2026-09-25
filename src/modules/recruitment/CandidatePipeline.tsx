@@ -583,9 +583,9 @@ const CandidatePipeline: React.FC = () => {
         title={t('recruitment_reject_candidate')}
       >
         <div className="space-y-4">
-          <p className="text-sm text-slate-600" dangerouslySetInnerHTML={{ 
-            __html: t('recruitment_rejection_reason_msg', { name: selectedCandidate?.name }) 
-          }} />
+          <p className="text-sm text-slate-600">
+            {t('recruitment_rejection_reason_msg', { name: selectedCandidate?.name || '' })}
+          </p>
           <textarea
             className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-brand-primary-start/20 focus:border-brand-primary-end"
             rows={3}

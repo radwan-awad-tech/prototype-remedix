@@ -3,11 +3,12 @@ import { User, RoleType } from '../../types';
 
 import { demoIdentity, setSessionActor } from './session';
 import { ROLE_ORDER } from './permissions';
+import { DEMO_EMAIL, isDemoCredentialMatch } from './demoCredentials';
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (username: string, role: string) => void;
+  login: (email: string, password: string, role: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -48,9 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = (username: string, role: string, department?: string) => {
-    // Mock login logic
-    const mockUser = demoIdentity(username, role as RoleType);
+  const login = (email: string, password: string, role: string) => {
+    if (!isDemoCredentialMatch(email, password)) {
+      throw new Error('Invalid demo credentials.');
+    }
+
+    const mockUser = demoIdentity('Radwan', role as RoleType);
+    mockUser.email = DEMO_EMAIL;
     setSessionActor(mockUser);
     const mockToken = 'mock-jwt-token-' + Date.now();
 

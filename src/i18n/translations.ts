@@ -1,5 +1,13 @@
 import { Language } from '../context/SettingsContext';
 
+export function interpolateTranslation(text: string, params?: Record<string, string | number>): string {
+  if (!params) return text;
+  return text.replace(/\{\{([a-zA-Z0-9_]+)\}\}|\{([a-zA-Z0-9_]+)\}/g, (placeholder, doubleKey: string | undefined, singleKey: string | undefined) => {
+    const value = params[doubleKey || singleKey || ''];
+    return value === undefined ? '' : String(value);
+  });
+}
+
 export type TranslationKey =
   | 'manual_entry_success'
   | 'select_employee'

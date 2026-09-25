@@ -32,8 +32,12 @@ test('staff demo identities can retrieve only their own punch state', async () =
   }
 });
 
-test('all eight roles have a guide, unknown roles and routes fail closed', () => {
-  for (const role of ROLE_ORDER) { assert.ok(canAccessPath(role, '/access')); assert.ok(canAccessPath(role, '/')); assert.equal(canAccessPath(role, '/unlisted'), false); }
+test('only Senior Manager and HR Manager can view the role access guide', () => {
+  for (const role of ROLE_ORDER) {
+    assert.equal(canAccessPath(role, '/access'), ['Senior Manager', 'HR Manager'].includes(role), `${role} role-guide access`);
+    assert.ok(canAccessPath(role, '/'));
+    assert.equal(canAccessPath(role, '/unlisted'), false);
+  }
   assert.equal(canAccessPath('Employee','/reports'),true);
   assert.equal(canAccessPath('Occupational Health Officer','/reports'),true);
   assert.equal(canAccessPath('System Admin','/reports'),false);

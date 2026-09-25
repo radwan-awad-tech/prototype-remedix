@@ -24,13 +24,15 @@ The Auth module handles user identity, session management, and role-based access
 - **Change Password**: Update account security credentials.
 
 ## Current Mock/Scaffolded Behavior
-- **Authentication**: Credentials are checked against a hardcoded list of mock users.
-- **Tokens**: A simulated JWT is generated and stored in `localStorage`.
+- **Authentication**: Demo only; the fixed public demo credentials are in `demoCredentials.ts`, and the user chooses a preview role. The credentials are bundled into browser JavaScript and are not a security boundary.
+- **Demo credentials**: `radwan@gmail.com` / `root`, defined in `demoCredentials.ts`; intentionally public and embedded in the JavaScript bundle.
+- **Tokens**: A non-cryptographic demo marker is stored in `localStorage`; it is not a JWT or proof of identity. Browser storage and the selected demo role can be altered by visitors.
 - **Persistence**: Session data is retrieved from `localStorage` on application initialization.
 - **Settings**: Language changes are applied globally via `SettingsContext` but are not persisted to a backend.
 
 ## Known Limitations
 - Real backend validation of credentials and tokens is not implemented.
+- This module is not production authentication and must not protect real data. The credentials are a convenience gate only; anyone can inspect the frontend, extract the credentials, alter local storage, or change the selected role.
 - Password reset and multi-factor authentication are currently placeholders.
 - Profile and setting changes are not saved to a persistent database.
 

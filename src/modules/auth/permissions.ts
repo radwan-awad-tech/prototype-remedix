@@ -5,15 +5,16 @@ export type AccessScope = 'organization' | 'department' | 'self';
 export interface RoleModuleAccess { path: string; level: AccessLevel; scope: AccessScope }
 export interface RoleAccessPolicy { role: RoleType; landingPath: string; modules: RoleModuleAccess[] }
 const m = (path: string, level: AccessLevel = 'view', scope: AccessScope = 'organization'): RoleModuleAccess => ({ path, level, scope });
-const personal = [m('/profile', 'manage', 'self'), m('/settings', 'manage', 'self'), m('/access')];
+const personal = [m('/profile', 'manage', 'self'), m('/settings', 'manage', 'self')];
+const roleAccessGuide = m('/access');
 export const ROLE_ORDER: RoleType[] = ['Senior Manager', 'System Admin', 'HR Manager', 'HR Officer', 'Department Head', 'Payroll Officer', 'Accountant', 'Occupational Health Officer', 'Employee'];
 const policy = (role: RoleType, modules: RoleModuleAccess[]): RoleAccessPolicy => ({ role, landingPath: '/', modules: [m('/'), ...modules, ...personal] });
 
 /** Proposed hospital delegation, NOT a universal hierarchy or production authorization. */
 export const ROLE_ACCESS_POLICIES: Record<RoleType, RoleAccessPolicy> = {
-  'Senior Manager': policy('Senior Manager', ['/employees','/doctors','/scheduling','/leaves','/attendance','/licenses','/recruitment','/performance','/payroll','/health','/reports','/admin'].map(path => m(path, 'manage'))),
+  'Senior Manager': policy('Senior Manager', [...['/employees','/doctors','/scheduling','/leaves','/attendance','/licenses','/recruitment','/performance','/payroll','/health','/reports','/admin'].map(path => m(path, 'manage')), roleAccessGuide]),
   'System Admin': policy('System Admin', [m('/admin', 'manage')]),
-  'HR Manager': policy('HR Manager', [m('/employees', 'manage'), m('/doctors', 'manage'), m('/scheduling', 'manage'), m('/leaves', 'manage'), m('/attendance', 'manage'), m('/licenses', 'manage'), m('/recruitment', 'manage'), m('/performance', 'manage'), m('/payroll', 'manage'), m('/health', 'manage'), m('/reports')]),
+  'HR Manager': policy('HR Manager', [m('/employees', 'manage'), m('/doctors', 'manage'), m('/scheduling', 'manage'), m('/leaves', 'manage'), m('/attendance', 'manage'), m('/licenses', 'manage'), m('/recruitment', 'manage'), m('/performance', 'manage'), m('/payroll', 'manage'), m('/health', 'manage'), m('/reports'), roleAccessGuide]),
   'HR Officer': policy('HR Officer', [m('/employees', 'manage'), m('/doctors'), m('/scheduling'), m('/leaves', 'review'), m('/attendance', 'review'), m('/licenses', 'manage'), m('/recruitment', 'manage'), m('/performance'), m('/payroll', 'review'), m('/health', 'review'), m('/reports')]),
   'Department Head': policy('Department Head', [m('/employees', 'view', 'department'), m('/doctors', 'view', 'department'), m('/scheduling', 'manage', 'department'), m('/leaves', 'review', 'department'), m('/attendance', 'review', 'department'), m('/licenses', 'view', 'department'), m('/recruitment', 'review', 'department'), m('/performance', 'review', 'department'), m('/reports', 'view', 'department')]),
   'Payroll Officer': policy('Payroll Officer', [m('/payroll', 'manage'), m('/attendance'), m('/leaves'), m('/reports')]),

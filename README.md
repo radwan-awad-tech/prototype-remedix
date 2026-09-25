@@ -1,10 +1,10 @@
-# MediStaff HR Frontend - Project Foundation
+# REMEDIX Workforce — Prototype
 
-This repository contains the frontend codebase for the MediStaff HR Management System. At its current stage, this project is **frontend-only**. All data displayed and managed within the application is simulated using mock data and services. There is no real backend implementation or database connection.
+This repository contains the REMEDIX Workforce frontend prototype. It is **not a production hospital system**: it runs on mock data, has no backend or database, and uses demo-only authentication and client-side role checks. Never use it to store or process real employee, payroll, credential, or occupational-health data.
 
 ## Purpose of the Application
 
-The MediStaff HR application aims to provide a comprehensive suite of tools for managing human resources within a healthcare organization. It covers modules such as employee management, recruitment, performance, payroll, attendance, leave management, occupational health, and reporting.
+The REMEDIX Workforce prototype demonstrates hospital workforce operations, including employee management, recruitment, performance, payroll, attendance, leave management, occupational health, and reporting.
 
 ## Current Frontend-Only Status & Limitations
 
@@ -15,13 +15,12 @@ The MediStaff HR application aims to provide a comprehensive suite of tools for 
 
 ## Setup & Installation
 
-1.  **Prerequisites**: Node.js (v18+ recommended) and npm.
+1.  **Prerequisites**: Node.js 20+ and npm.
 2.  **Install Dependencies**:
     ```bash
     npm install
     ```
-3.  **Environment Variables**: 
-    Copy `.env.example` to `.env` and fill in any required values. Currently, no specific backend-related environment variables are needed for frontend-only operation.
+3.  **Environment Variables**: None are required for this frontend prototype. Keep all API credentials on a trusted server; never embed secrets in browser builds.
 
 ## Run Development Server
 
@@ -37,7 +36,7 @@ To build the application for production:
 ```bash
 npm run build
 ```
-This will generate static files in the `dist/` directory.
+This generates static files in `dist/`. The public demo gate uses the fixed credentials documented in `src/modules/auth/demoCredentials.ts`. They are embedded in the browser bundle and only discourage casual access; they do not secure the app, its mock records, or its client-side role selector. Never put real or confidential data in the public demo. A trusted backend and server-enforced authentication and authorization are required before using this as an application.
 
 To preview the production build locally:
 ```bash
@@ -88,13 +87,15 @@ MediStaff HR is a modern Single Page Application (SPA) built with:
 The system uses Role-Based Access Control (RBAC) to restrict navigation and actions. The `Sidebar` component filters navigation items based on the `currentRole` of the user. The `AuthContext` manages the current user's role.
 
 Currently supported roles (simulated):
-*   **System Admin**: Full access to all modules, including system configuration and audit logs.
-*   **HR Manager**: High-level access to all HR functions, reporting, and approvals.
-*   **HR Officer**: Operational access to employee records, attendance, and leaves.
-*   **Department Head**: Scoped access to their specific department's data (e.g., team attendance, leave approvals).
-*   **Employee**: Self-service access to their own profile, payslips, and leave requests.
-*   **Payroll Officer**: Specialized access to the Payroll and Reports modules.
-*   **Occupational Health Officer**: Exclusive access to the Occupational Health module for managing sensitive medical records.
+*   **Senior Manager**: Broad demo access across configured modules.
+*   **System Admin**: Technical account and system administration only.
+*   **HR Manager / HR Officer**: Role-scoped HR operations and review.
+*   **Department Head**: Department-scoped operations and first-stage review.
+*   **Payroll Officer / Accountant**: Payroll preparation and independent review, respectively.
+*   **Occupational Health Officer**: Occupational-health records in the demo.
+*   **Employee**: Self-service demo access.
+
+These are prototype rules only. They are not a trusted security boundary: a user controls the browser and can inspect bundled mock records or alter local storage.
 
 ## Future Backend Integration Notes
 

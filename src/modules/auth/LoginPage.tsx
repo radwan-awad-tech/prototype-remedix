@@ -46,9 +46,15 @@ export const LoginPage: React.FC = () => {
         return;
       }
 
-      // For demo purposes, any non-empty credentials work
-      login(identifier, selectedRole);
-      setIsSubmitting(false);
+      try {
+        login(identifier, password, selectedRole);
+      } catch {
+        setError(language === 'ar'
+          ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.'
+          : 'The email address or password is incorrect.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }, 800);
   };
 
@@ -202,7 +208,7 @@ export const LoginPage: React.FC = () => {
                         <option key={role.id} value={role.id}>{t(role.translationKey)}</option>
                       ))}
                     </select>
-                    <p className="text-xs text-amber-800">{language === 'ar' ? 'نموذج تجريبي: اختر الدور وأدخل أي اسم مستخدم وكلمة مرور.' : 'Demo only: choose a role and enter any username and password.'}</p>
+                    <p className="text-xs text-amber-800">{language === 'ar' ? 'حساب عرض تجريبي ببيانات وهمية؛ اختيار الدور مخصص لاستعراض الواجهات فقط.' : 'Demo account with synthetic data; role selection is for previewing screens only.'}</p>
                   </div>
 
                   <div className="flex items-center">
