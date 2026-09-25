@@ -12,10 +12,10 @@ const PerformancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Employee Reviews');
 
   const allTabs = [
-    { id: 'Evaluation Forms', label: 'Evaluation Forms', translationKey: 'eval_templates' as const, roles: ['HR Manager', 'HR Officer', 'System Admin'] },
-    { id: 'Evaluation Cycles', label: 'Evaluation Cycles', translationKey: 'eval_cycles' as const, roles: ['HR Manager', 'HR Officer', 'System Admin'] },
+    { id: 'Evaluation Forms', label: 'Evaluation Forms', translationKey: 'eval_templates' as const, roles: ['Senior Manager', 'HR Manager', 'HR Officer', 'System Admin'] },
+    { id: 'Evaluation Cycles', label: 'Evaluation Cycles', translationKey: 'eval_cycles' as const, roles: ['Senior Manager', 'HR Manager', 'HR Officer', 'System Admin'] },
     { id: 'Employee Reviews', label: 'Employee Reviews', translationKey: 'employee_reviews' as const, roles: ['*'] },
-    { id: 'Results & Analytics', label: 'Results & Analytics', translationKey: 'results_analytics' as const, roles: ['HR Manager', 'HR Officer', 'System Admin', 'Department Head'] },
+    { id: 'Results & Analytics', label: 'Results & Analytics', translationKey: 'results_analytics' as const, roles: ['Senior Manager', 'HR Manager', 'HR Officer', 'System Admin', 'Department Head'] },
   ];
 
   const tabs = allTabs.filter(tab => 

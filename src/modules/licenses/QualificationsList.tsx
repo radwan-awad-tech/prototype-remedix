@@ -106,7 +106,7 @@ export const QualificationsList: React.FC<QualificationsListProps> = ({ type, us
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const targetEmployeeId = userRole === 'Employee' ? user?.id : addFormData.employeeId;
+    const targetEmployeeId = userRole === 'Employee' ? user?.employeeId : addFormData.employeeId;
     
     if (!targetEmployeeId || !addFormData.name || !addFormData.number || !addFormData.expiryDate) {
       showToast(t('field_required'), 'error');

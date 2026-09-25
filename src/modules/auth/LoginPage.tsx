@@ -25,6 +25,7 @@ export const LoginPage: React.FC = () => {
   const [isResetSent, setIsResetSent] = useState(false);
 
   const roles = [
+    { id: 'Senior Manager', translationKey: 'senior_manager' as const },
     { id: 'HR Manager', translationKey: 'hr_manager' as const },
     { id: 'HR Officer', translationKey: 'hr_officer' as const },
     { id: 'Department Head', translationKey: 'dept_head' as const },

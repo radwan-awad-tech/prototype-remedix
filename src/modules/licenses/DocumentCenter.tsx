@@ -140,7 +140,7 @@ export const DocumentCenter: React.FC<DocumentCenterProps> = ({ userRole }) => {
         <button className="p-1.5 text-gray-400 hover:text-brand-primary-end hover:bg-brand-primary-start/10 rounded-lg transition-all" title={t('download')}>
           <Download size={16} />
         </button>
-        {userRole === 'HR Manager' && (
+        {['Senior Manager','HR Manager'].includes(userRole) && (
           <button 
             onClick={() => handleDelete(row.id)}
             className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" 

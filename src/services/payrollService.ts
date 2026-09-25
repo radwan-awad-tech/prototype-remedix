@@ -1,3 +1,4 @@
+import { PAYROLL_READERS, PAYROLL_PREPARERS, PAYROLL_APPROVERS } from '../modules/auth/permissions';
 import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
 import { withinScope } from '../modules/auth/permissions';
 import { getSessionActor } from '../modules/auth/session';
@@ -211,11 +212,11 @@ const rawService = {
 };
 
 export const payrollService = secureService('/payroll', rawService, {
-listRuns: { roles: FINANCE }, listComponents: { roles: FINANCE }, listRules: { roles: FINANCE }, listReviews: { roles: FINANCE },
+listRuns: { roles: PAYROLL_READERS }, listComponents: { roles: PAYROLL_READERS }, listRules: { roles: PAYROLL_READERS }, listReviews: { roles: PAYROLL_READERS },
  getPayslip: {}, listPayslips: {},
- createRun: { roles: ['Payroll Officer'], validate: (u,period) => /^\d{4}-(0[1-9]|1[0-2])$/.test(period) && !MOCK_PAYROLL_RUNS.some(r => r.period === period) },
- calculateRun: { roles: ['Payroll Officer'], validate: (u,id) => ['Draft','Calculated'].includes(MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status || '') },
- lockRun: { roles: ['Payroll Officer'], validate: (u,id) => MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status === 'Calculated' },
- unlockRun: { roles: ['Payroll Officer'], validate: (u,id) => MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status === 'Locked' },
- approveRun: { roles: ['Accountant'], validate: (u,id) => { const r = MOCK_PAYROLL_RUNS.find(r => r.id === id); return r?.status === 'Locked' && !!preparers.get(id) && preparers.get(id) !== u.id; } }
+ createRun: { roles: PAYROLL_PREPARERS, validate: (u,period) => /^\d{4}-(0[1-9]|1[0-2])$/.test(period) && !MOCK_PAYROLL_RUNS.some(r => r.period === period) },
+ calculateRun: { roles: PAYROLL_PREPARERS, validate: (u,id) => ['Draft','Calculated'].includes(MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status || '') },
+ lockRun: { roles: PAYROLL_PREPARERS, validate: (u,id) => MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status === 'Calculated' },
+ unlockRun: { roles: PAYROLL_PREPARERS, validate: (u,id) => MOCK_PAYROLL_RUNS.find(r => r.id === id)?.status === 'Locked' },
+ approveRun: { roles: PAYROLL_APPROVERS, validate: (u,id) => { const r = MOCK_PAYROLL_RUNS.find(r => r.id === id); return r?.status === 'Locked' && !!preparers.get(id) && preparers.get(id) !== u.id; } }
 });

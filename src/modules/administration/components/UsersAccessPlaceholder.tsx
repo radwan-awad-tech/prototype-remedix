@@ -11,6 +11,7 @@ import { useToast } from '../../../components/ui/Toast';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 
 const ROLE_TRANSLATION_KEYS: Record<RoleType, string> = {
+  'Senior Manager': 'senior_manager',
   'System Admin': 'system_admin',
   'HR Manager': 'hr_manager',
   'HR Officer': 'hr_officer',
@@ -51,7 +52,7 @@ export const UsersAccessPlaceholder: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const selectedPolicy = ROLE_ACCESS_POLICIES[selectedRole];
 
-  const roleLabel = (role: RoleType) => t(ROLE_TRANSLATION_KEYS[role] as any);
+  const roleLabel = (role: RoleType) => role === 'Senior Manager' ? (language === 'ar' ? 'المدير الأعلى' : 'Senior Manager') : t(ROLE_TRANSLATION_KEYS[role] as any);
   const moduleLabel = (path: string) => MODULE_NAMES[path]?.[language === 'ar' ? 0 : 1] || path;
   const accessLabel = (level: string) => level === 'manage' ? (language === 'ar' ? 'إجراءات محددة' : 'Scoped actions') : level === 'review' ? t('approval_review') : t('view');
   const scopeLabel = (scope: string) => scope === 'organization'
@@ -278,6 +279,7 @@ export const UsersAccessPlaceholder: React.FC = () => {
                 <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">{t('role')}</label>
                 <select required className="w-full px-4 py-2 bg-bg-main border border-border-base rounded-xl text-sm focus:ring-2 focus:ring-brand-primary-start/20">
                   <option value="">{t('select_role')}</option>
+                  <option value="Senior Manager">{language === 'ar' ? 'المدير الأعلى' : 'Senior Manager'}</option>
                   <option value="System Admin">{t('system_admin')}</option>
                   <option value="HR Manager">{t('hr_manager')}</option>
                   <option value="HR Officer">{t('hr_officer')}</option>
@@ -332,7 +334,8 @@ export const UsersAccessPlaceholder: React.FC = () => {
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">{t('role')}</label>
                   <select required defaultValue={selectedUser.role} className="w-full px-4 py-2 bg-bg-main border border-border-base rounded-xl text-sm focus:ring-2 focus:ring-brand-primary-start/20">
-                    <option value="System Admin">{t('system_admin')}</option>
+                    <option value="Senior Manager">{language === 'ar' ? 'المدير الأعلى' : 'Senior Manager'}</option>
+                  <option value="System Admin">{t('system_admin')}</option>
                     <option value="HR Manager">{t('hr_manager')}</option>
                     <option value="HR Officer">{t('hr_officer')}</option>
                     <option value="Department Head">{t('dept_head')}</option>

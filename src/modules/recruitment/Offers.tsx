@@ -15,7 +15,7 @@ const Offers: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   
-  const canManageOffers = ['HR Manager', 'System Admin', 'Recruiter'].includes(user?.role || '');
+  const canManageOffers = ['Senior Manager', 'HR Manager', 'HR Officer'].includes(user?.role || '');
 
   const [offers, setOffers] = useState<Offer[]>([]);
   const [candidates, setCandidates] = useState<Candidate[]>([]);

@@ -74,7 +74,7 @@ export interface FollowUp {
 export type OHRole = 'OHO' | 'HR_COMPLIANCE' | 'DEPT_HEAD' | 'EMPLOYEE';
 
 export const getOHRole = (role: string): OHRole => {
-  if (role === 'Occupational Health Officer') return 'OHO';
+  if (['Senior Manager', 'Occupational Health Officer'].includes(role)) return 'OHO';
   if (role === 'HR Manager' || role === 'HR Officer') return 'HR_COMPLIANCE';
   if (role === 'Department Head') return 'DEPT_HEAD';
   return 'EMPLOYEE';

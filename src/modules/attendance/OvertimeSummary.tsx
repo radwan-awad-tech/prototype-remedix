@@ -86,7 +86,7 @@ export const OvertimeSummary: React.FC<OvertimeSummaryProps> = ({ userRole }) =>
             <Download size={18} />
             {t('export_csv')}
           </button>
-          {userRole === 'HR Manager' && (
+          {['Senior Manager', 'HR Manager'].includes(userRole) && (
             <button 
               onClick={handleSendToPayroll}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all text-sm font-medium shadow-sm"

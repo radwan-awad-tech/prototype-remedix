@@ -9,6 +9,7 @@ export interface ApiResponse<T> {
 }
 
 export type RoleType = 
+  | 'Senior Manager'
   | 'HR Manager' 
   | 'HR Officer' 
   | 'Department Head' 

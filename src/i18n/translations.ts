@@ -10,6 +10,7 @@ export type TranslationKey =
   | 'failed_to_save'
   | 'failed_to_delete'
   | 'saving'
+  | 'senior_manager'
   | 'absences'
   | 'absent'
   | 'access_denied'
@@ -1574,6 +1575,7 @@ export type TranslationKey =
 
 export const translations: Record<Language, Record<string, string>> = {
   en: {
+    senior_manager: 'Senior Manager',
     team_status_today: 'Team Status Today',
     clocked_in: 'Clocked In',
     pending_team_approvals: 'Pending Team Approvals',
@@ -3084,6 +3086,7 @@ export const translations: Record<Language, Record<string, string>> = {
     yes_cancel: 'Yes, cancel',
   },
   ar: {
+    senior_manager: 'المدير الأعلى',
     absences: 'الغياب',
     manual_entry_success: 'تم إنشاء سجل الحضور بنجاح.',
     select_employee: 'اختر الموظف',

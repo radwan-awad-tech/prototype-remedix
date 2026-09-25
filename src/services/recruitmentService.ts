@@ -176,8 +176,8 @@ const rawService = {
 
 export const recruitmentService = secureService('/recruitment', rawService, {
 listJobOpenings: {}, listCandidates: {}, listInterviews: {}, listOffers: { roles: HR },
- createJobOpening: { roles: HR }, updateJobOpeningStatus: { roles: ['HR Manager'] },
- addCandidate: { roles: HR }, updateCandidateStage: { roles: HR, validate: (u,id,stage) => stage !== 'Hired' && (u.role === 'HR Manager' || stage !== 'Offered') },
+ createJobOpening: { roles: HR }, updateJobOpeningStatus: { roles: ['Senior Manager','HR Manager'] },
+ addCandidate: { roles: HR }, updateCandidateStage: { roles: HR, validate: (u,id,stage) => stage !== 'Hired' && (['Senior Manager','HR Manager'].includes(u.role) || stage !== 'Offered') },
  scheduleInterview: { roles: HR }, recordInterviewOutcome: { roles: ['HR Manager','HR Officer','Department Head'], target: id => interviews.find(i => i.id === id) },
- generateOffer: { roles: HR }, updateOfferStatus: { roles: ['HR Manager'] }, convertCandidateToEmployee: { roles: ['HR Manager'] }
+ generateOffer: { roles: HR }, updateOfferStatus: { roles: ['Senior Manager','HR Manager'] }, convertCandidateToEmployee: { roles: ['Senior Manager','HR Manager'] }
 });

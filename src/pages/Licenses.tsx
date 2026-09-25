@@ -26,7 +26,7 @@ export const LicensesPage: React.FC<LicensesPageProps> = () => {
       { id: 'documents', label: t('document_center') },
     ];
 
-    if (['HR Manager', 'System Admin'].includes(userRole)) {
+    if (['Senior Manager', 'HR Manager', 'System Admin'].includes(userRole)) {
       baseTabs.splice(2, 0, { id: 'verification', label: t('verification_queue') });
     }
 

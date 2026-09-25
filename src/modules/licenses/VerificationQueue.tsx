@@ -176,7 +176,7 @@ export const VerificationQueue: React.FC<VerificationQueueProps> = ({ userRole }
               </div>
             </div>
 
-            {selectedQual.verificationStatus === 'Pending' && (userRole === 'HR Manager' || userRole === 'HR Officer') && (
+            {selectedQual.verificationStatus === 'Pending' && ['Senior Manager','HR Manager','HR Officer'].includes(userRole) && (
               <div className="flex gap-3 pt-6 border-t border-gray-100">
                 <button
                   onClick={handleVerify}

@@ -48,6 +48,6 @@ const rawService = {
 };
 
 export const employeeService = secureService('/employees', rawService, {
-listEmployees: {}, getEmployee: {}, createEmployee: { roles: ['HR Manager'] },
- updateEmployee: { roles: HR, target: id => employees.find(e => e.id === id), validate: (u, id, d) => !('id' in d) && (u.role === 'HR Manager' || !['status','role','department','position','supervisorId','contractType','hireDate'].some(k => k in d)) }
+listEmployees: {}, getEmployee: {}, createEmployee: { roles: ['Senior Manager','HR Manager'] },
+ updateEmployee: { roles: HR, target: id => employees.find(e => e.id === id), validate: (u, id, d) => !('id' in d) && (['Senior Manager','HR Manager'].includes(u.role) || !['status','role','department','position','supervisorId','contractType','hireDate'].some(k => k in d)) }
 });

@@ -112,7 +112,7 @@ const rawService = {
 export const attendanceService = secureService('/attendance', rawService, {
 listAttendanceRecords: {}, listAttendanceCorrections: {},
  createAttendanceCorrection: { roles: ['HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => !!u.employeeId && d.employeeId === u.employeeId },
- approveCorrection: { roles: ['HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },
- rejectCorrection: { roles: ['HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },
- createAttendanceRecord: { roles: ['HR Manager'] }, getAttendanceSummary: { roles: ['HR Manager','HR Officer'] }
+ approveCorrection: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },
+ rejectCorrection: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },
+ createAttendanceRecord: { roles: ['Senior Manager','HR Manager'] }, getAttendanceSummary: { roles: ['Senior Manager','HR Manager','HR Officer'] }
 });

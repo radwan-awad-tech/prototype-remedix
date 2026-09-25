@@ -6,7 +6,7 @@ import { getSessionActor, getSessionVersion } from '../modules/auth/session';
 type Row = Record<string, any>;
 type Rule = { roles?: RoleType[]; metadata?: boolean; target?: (...args: any[]) => Row | undefined; validate?: (user: User, ...args: any[]) => boolean };
 export type ServiceRules = Record<string, Rule>;
-export const HR: RoleType[] = ['HR Manager', 'HR Officer'];
+export const HR: RoleType[] = ['Senior Manager', 'HR Manager', 'HR Officer'];
 export const FINANCE: RoleType[] = ['Payroll Officer', 'Accountant'];
 let employeeDirectory = () => MOCK_EMPLOYEES;
 export const setEmployeeDirectory = (lookup: typeof employeeDirectory) => { employeeDirectory = lookup; };
@@ -38,7 +38,7 @@ export function secureService<T extends Record<string, (...args: any[]) => Promi
     const rule = rules[name];
     const denied = () => ({ success: false, status: 403, data: null, message: 'Access denied: role, scope or workflow does not permit this action.' });
     if (!user || user.status === 'inactive' || !getModuleAccess(user.role, path) || !rule) return denied();
-    if (rule.roles && !rule.roles.includes(user.role)) return denied();
+    if (rule.roles && user.role !== 'Senior Manager' && !rule.roles.includes(user.role)) return denied();
     if (rule.target) {
       const target = rule.target(...args);
       if (!target || !withinScope(user, path, scopedRow(target, path))) return denied();

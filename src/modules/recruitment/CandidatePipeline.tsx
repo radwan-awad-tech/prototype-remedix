@@ -17,7 +17,7 @@ const CandidatePipeline: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
 
-  const canManageCandidates = ['HR Manager', 'System Admin', 'Recruiter'].includes(user?.role || '');
+  const canManageCandidates = ['Senior Manager', 'HR Manager', 'HR Officer'].includes(user?.role || '');
 
   const stageLabels: Record<string, string> = {
     'Applied': t('recruitment_applied'),

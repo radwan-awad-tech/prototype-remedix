@@ -100,7 +100,7 @@ const rawService = {
 
 export const performanceService = secureService('/performance', rawService, {
 listTemplates: { metadata: true }, listCycles: { metadata: true }, listReviews: {},
- createTemplate: { roles: ['HR Manager'] }, updateTemplateStatus: { roles: ['HR Manager'] },
+ createTemplate: { roles: ['Senior Manager','HR Manager'] }, updateTemplateStatus: { roles: ['Senior Manager','HR Manager'] },
  submitReview: { roles: ['HR Manager','Department Head'], target: id => reviews.find(r => r.id === id), validate: (u,id,d) => { const r = reviews.find(r => r.id === id); return !!r && r.status !== 'Finalized' && r.employeeId !== u.employeeId && !['id','employeeId','department','evaluatorId','cycleId'].some(k => k in d && d[k] !== r[k]); } },
- getPerformanceAnalytics: { roles: ['HR Manager'] }
+ getPerformanceAnalytics: { roles: ['Senior Manager','HR Manager'] }
 });

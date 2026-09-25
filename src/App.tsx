@@ -25,6 +25,7 @@ import { ToastProvider } from './components/ui/Toast';
 import { ScopedWorkspace } from './pages/ScopedWorkspace';
 import { RoleAccessPage } from './pages/RoleAccess';
 import { getModuleAccess } from './modules/auth/permissions';
+import { HealthAdministrationPage } from './pages/HealthAdministration';
 
 const AppContent = () => {
   const { currentPath, navigate } = useNavigation();
@@ -67,6 +68,7 @@ const AppContent = () => {
     }
 
     if (currentPath === '/access') return <RoleAccessPage />;
+    if (currentPath === '/health' && ['HR Manager','HR Officer'].includes(user.role)) return <HealthAdministrationPage />;
     if (['/', '/reports', '/payroll', '/leaves', '/attendance'].includes(currentPath) ||
       (!['/settings', '/profile', '/admin'].includes(currentPath) && getModuleAccess(user.role, currentPath)?.level !== 'manage')) {
       return <ScopedWorkspace key={`${user.id}:${currentPath}`} path={currentPath} />;

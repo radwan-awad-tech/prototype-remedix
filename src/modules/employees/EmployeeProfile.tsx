@@ -47,7 +47,7 @@ export const EmployeeProfile: React.FC<ProfileProps> = ({ employee, onClose }) =
   };
 
   const handleAction = (action: string) => {
-    if (['Terminate', 'Update Status'].includes(action) && user?.role !== 'HR Manager') return;
+    if (['Terminate', 'Update Status'].includes(action) && !['Senior Manager','HR Manager'].includes(user?.role || '')) return;
     if (action === 'Terminate') {
       setIsTerminateModalOpen(true);
       return;
@@ -56,7 +56,7 @@ export const EmployeeProfile: React.FC<ProfileProps> = ({ employee, onClose }) =
   };
 
   const confirmTerminate = () => {
-    if (user?.role !== 'HR Manager') return;
+    if (!['Senior Manager','HR Manager'].includes(user?.role || '')) return;
     showToast(t('feature_coming_soon'), 'info');
     setIsTerminateModalOpen(false);
     onClose();
@@ -137,14 +137,14 @@ export const EmployeeProfile: React.FC<ProfileProps> = ({ employee, onClose }) =
                     </button>
                     <button 
                       onClick={() => handleAction('Update Status')}
-                      hidden={user?.role !== 'HR Manager'}
+                      hidden={!['Senior Manager','HR Manager'].includes(user?.role || '')}
                       className="w-full text-start px-4 py-2 text-sm text-text-primary hover:bg-bg-main transition-colors"
                     >
                       {t('update_status')}
                     </button>
                     <button 
                       onClick={() => handleAction('Terminate')}
-                      hidden={user?.role !== 'HR Manager'}
+                      hidden={!['Senior Manager','HR Manager'].includes(user?.role || '')}
                       className="w-full text-start px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors"
                     >
                       {t('terminate')}

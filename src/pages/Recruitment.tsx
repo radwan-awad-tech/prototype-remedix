@@ -16,9 +16,9 @@ const RecruitmentPage: React.FC = () => {
 
   const allTabs = [
     { id: 'Job Openings', label: t('recruitment_job_openings'), translationKey: 'job_openings' as const, roles: ['*'] },
-    { id: 'Pipeline', label: t('recruitment_candidate_pipeline'), translationKey: 'candidates' as const, roles: ['HR Manager', 'HR Officer', 'System Admin', 'Department Head'] },
-    { id: 'Interviews', label: t('recruitment_interviews'), translationKey: 'interviews' as const, roles: ['HR Manager', 'HR Officer', 'System Admin', 'Department Head'] },
-    { id: 'Offers', label: t('recruitment_offers'), translationKey: 'offers' as const, roles: ['HR Manager', 'HR Officer', 'System Admin'] },
+    { id: 'Pipeline', label: t('recruitment_candidate_pipeline'), translationKey: 'candidates' as const, roles: ['Senior Manager', 'HR Manager', 'HR Officer', 'System Admin', 'Department Head'] },
+    { id: 'Interviews', label: t('recruitment_interviews'), translationKey: 'interviews' as const, roles: ['Senior Manager', 'HR Manager', 'HR Officer', 'System Admin', 'Department Head'] },
+    { id: 'Offers', label: t('recruitment_offers'), translationKey: 'offers' as const, roles: ['Senior Manager', 'HR Manager', 'HR Officer', 'System Admin'] },
   ];
 
   const tabs = allTabs.filter(tab => 

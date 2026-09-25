@@ -16,7 +16,7 @@ export const AdministrationView: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<AdminTab>('audit');
 
-  const isAdmin = ['HR Manager', 'System Admin'].includes(user?.role || '');
+  const isAdmin = ['Senior Manager', 'System Admin'].includes(user?.role || '');
 
   const tabs = [
     { id: 'settings', label: 'System Settings', icon: <Settings className="w-4 h-4" />, translationKey: 'system_settings' as const },

@@ -27,7 +27,7 @@ const ReportsPage: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<ReportTemplate | null>(null);
 
   const isAuthorized = useMemo(() => {
-    return ['HR Manager', 'System Admin'].includes(user?.role || '');
+    return ['Senior Manager', 'HR Manager', 'System Admin', 'Accountant'].includes(user?.role || '');
   }, [user?.role]);
 
   const handleSelectReport = (report: ReportTemplate) => {

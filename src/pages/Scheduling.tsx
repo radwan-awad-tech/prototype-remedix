@@ -26,7 +26,7 @@ export const SchedulingPage: React.FC = () => {
       { id: 'requests', label: t('swap_requests'), icon: <RefreshCw className="w-4 h-4" />, translationKey: 'swap_requests' as const },
     ];
     
-    if (['HR Manager', 'System Admin', 'Department Head'].includes(user?.role || '')) {
+    if (['Senior Manager', 'HR Manager', 'Department Head'].includes(user?.role || '')) {
       baseTabs.push(
         { id: 'ai-scheduling', label: 'AI Scheduling', icon: <Brain className="w-4 h-4" />, translationKey: 'shifts_calendar' as const },
         { id: 'types', label: t('shift_types'), icon: <Settings className="w-4 h-4" />, translationKey: 'shift_types' as const },

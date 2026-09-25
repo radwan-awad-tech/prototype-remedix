@@ -5,7 +5,7 @@ import { apiClient } from './apiClient';
 import { getSessionActor } from '../modules/auth/session';
 
 function requireAdmin() {
-  if (getSessionActor()?.role !== 'System Admin' || getSessionActor()?.status === 'inactive') throw new Error('Access denied');
+  if (!['System Admin','Senior Manager'].includes(getSessionActor()?.role || '') || getSessionActor()?.status === 'inactive') throw new Error('Access denied');
 }
 
 let auditLogs = [...mockAuditLogs];

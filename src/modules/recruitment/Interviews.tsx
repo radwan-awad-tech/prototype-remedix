@@ -15,7 +15,7 @@ const Interviews: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   
-  const canManageInterviews = ['HR Manager', 'System Admin', 'Recruiter'].includes(user?.role || '');
+  const canManageInterviews = ['Senior Manager', 'HR Manager', 'HR Officer'].includes(user?.role || '');
 
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [candidates, setCandidates] = useState<Candidate[]>([]);

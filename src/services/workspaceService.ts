@@ -10,6 +10,7 @@ import { doctorService } from './doctorService';
 import { occupationalHealthService } from './occupationalHealthService';
 import { getSessionActor } from '../modules/auth/session';
 import { canAccessPath } from '../modules/auth/permissions';
+import { HR_HEALTH_ROLES } from '../modules/auth/permissions';
 
 export async function loadWorkspace(path: string): Promise<Record<string, any>[]> {
   const user = getSessionActor();
@@ -25,7 +26,7 @@ export async function loadWorkspace(path: string): Promise<Record<string, any>[]
     case '/recruitment': response = await recruitmentService.listJobOpenings(); break;
     case '/performance': response = await performanceService.listReviews(); break;
     case '/payroll': response = user.role === 'Employee' ? await payrollService.listPayslips() : await payrollService.listRuns(); break;
-    case '/health': response = await occupationalHealthService.getCheckups(user, 'OHO'); break;
+    case '/health': response = HR_HEALTH_ROLES.includes(user.role) ? await occupationalHealthService.getAdministrationRecords() : await occupationalHealthService.getCheckups(user, 'OHO'); break;
     default: return [];
   }
   if (!response.success) throw new Error(response.message || 'Access denied');

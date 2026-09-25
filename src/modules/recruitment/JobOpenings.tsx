@@ -32,8 +32,8 @@ const JobOpenings: React.FC<JobOpeningsProps> = ({ onNavigateToPipeline }) => {
   const [reason, setReason] = useState('');
   const { showToast } = useToast();
 
-  const canApprove = user?.role === 'HR Manager' || user?.role === 'System Admin';
-  const canManageOpenings = user?.role === 'HR Manager' || user?.role === 'System Admin' || user?.role === 'Department Manager';
+  const canApprove = ['Senior Manager','HR Manager'].includes(user?.role || '') || user?.role === 'System Admin';
+  const canManageOpenings = ['Senior Manager','HR Manager'].includes(user?.role || '') || user?.role === 'System Admin' || user?.role === 'Department Manager';
 
   const fetchOpenings = async () => {
     setIsLoading(true);

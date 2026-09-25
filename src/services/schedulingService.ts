@@ -72,8 +72,8 @@ const rawService = {
 
 export const schedulingService = secureService('/scheduling', rawService, {
 listShiftTypes: { metadata: true }, listPolicies: { metadata: true }, listScheduleAssignments: {},
- createScheduleAssignment: { roles: ['HR Manager','Department Head'], target: d => d, validate: (u,d) => !!d.employeeId && withinScope(u, '/scheduling', scopedRow(d,'/scheduling')) },
- updateScheduleAssignment: { roles: ['HR Manager','Department Head'], target: id => assignments.find(a => a.id === id), validate: (u,id,d) => !('id' in d) && withinScope(u, '/scheduling', scopedRow({...assignments.find(a => a.id === id),...d},'/scheduling')) },
- deleteScheduleAssignment: { roles: ['HR Manager','Department Head'], target: id => assignments.find(a => a.id === id) },
- createShiftType: { roles: ['HR Manager'] }, createPolicy: { roles: ['HR Manager'] }
+ createScheduleAssignment: { roles: ['Senior Manager','HR Manager','Department Head'], target: d => d, validate: (u,d) => !!d.employeeId && withinScope(u, '/scheduling', scopedRow(d,'/scheduling')) },
+ updateScheduleAssignment: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => assignments.find(a => a.id === id), validate: (u,id,d) => !('id' in d) && withinScope(u, '/scheduling', scopedRow({...assignments.find(a => a.id === id),...d},'/scheduling')) },
+ deleteScheduleAssignment: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => assignments.find(a => a.id === id) },
+ createShiftType: { roles: ['Senior Manager','HR Manager'] }, createPolicy: { roles: ['Senior Manager','HR Manager'] }
 });

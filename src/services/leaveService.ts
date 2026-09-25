@@ -63,5 +63,5 @@ const rawService = {
 export const leaveService = secureService('/leaves', rawService, {
 listLeaveRequests: {}, listLeaveBalances: {}, listLeavePolicies: { metadata: true },
  createLeaveRequest: { roles: ['HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => !!u.employeeId && d.employeeId === u.employeeId },
- updateLeaveStatus: { roles: ['HR Manager','Department Head'], target: id => leaveRequests.find(r => r.id === id), validate: (u,id,status) => { const r = leaveRequests.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && ['Approved','Rejected'].includes(status) && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } }
+ updateLeaveStatus: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => leaveRequests.find(r => r.id === id), validate: (u,id,status) => { const r = leaveRequests.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && ['Approved','Rejected'].includes(status) && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } }
 });

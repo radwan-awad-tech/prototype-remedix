@@ -138,7 +138,7 @@ export const EmployeesPage: React.FC = () => {
       </button>
       <button 
         onClick={() => setIsWizardOpen(true)}
-        hidden={user?.role !== 'HR Manager'}
+        hidden={!['Senior Manager','HR Manager'].includes(user?.role || '')}
         className="btn-gradient-primary flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
       >
         <Plus className="w-4 h-4" />
@@ -224,7 +224,7 @@ export const EmployeesPage: React.FC = () => {
             icon: <Trash2 size={14} />,
             variant: 'danger' as const
           }
-        ].filter(action => action.label !== t('terminate') || user?.role === 'HR Manager')}
+        ].filter(action => action.label !== t('terminate') || ['Senior Manager','HR Manager'].includes(user?.role || ''))}
       />
 
       {/* Profile Drawer */}
@@ -284,7 +284,7 @@ export const EmployeesPage: React.FC = () => {
             </button>
             <button 
               onClick={() => {
-                if (user?.role !== 'HR Manager') return;
+                if (!['Senior Manager','HR Manager'].includes(user?.role || '')) return;
                 info(t('feature_coming_soon'));
                 setIsTerminateModalOpen(false);
               }}
