@@ -5,9 +5,6 @@ import { motion, AnimatePresence } from 'motion/react';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useSettings } from '../../context/SettingsContext';
-import { ForceLTR } from '../../components/ForceLTR';
-import { ROLE_PROFILES } from './permissions';
-import { RoleType } from '../../types';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -36,7 +33,6 @@ export const LoginPage: React.FC = () => {
     { id: 'Employee', translationKey: 'employee' as const }
   ];
 
-  const roleProfile = ROLE_PROFILES[selectedRole as RoleType];
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -110,8 +106,6 @@ export const LoginPage: React.FC = () => {
           <div className="inline-flex items-center justify-center rounded-2xl border border-brand-light-gray bg-white px-8 py-5 shadow-sm mb-5">
             <img src="/brand/remedix-logo.png" alt="REMEDIX" className="w-56 max-w-full" />
           </div>
-          <p className="brand-eyebrow"><ForceLTR>REMEDIX</ForceLTR></p>
-          <p className="text-text-secondary mt-2">{t('hospital_mgmt_system')}</p>
         </div>
 
         {/* Login Card */}
@@ -127,7 +121,6 @@ export const LoginPage: React.FC = () => {
               >
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-text-primary">{t('welcome_back')}</h2>
-                  <p className="text-sm text-text-secondary mt-1">{t('sign_in_subtitle')}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -151,7 +144,6 @@ export const LoginPage: React.FC = () => {
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
                         className="input-base ps-10 w-full"
-                        placeholder="name@medistaff.com"
                         required
                       />
                     </div>
@@ -210,8 +202,7 @@ export const LoginPage: React.FC = () => {
                         <option key={role.id} value={role.id}>{t(role.translationKey)}</option>
                       ))}
                     </select>
-                    <p className="text-xs leading-6 text-text-secondary rounded-lg bg-bg-main p-3">{language === 'ar' ? `${roleProfile.authority}. ${roleProfile.limits}` : roleProfile.en}</p>
-                    <p className="text-xs text-amber-800">{language === 'ar' ? 'اختيار الدور للتجربة فقط، وليس تسجيل دخول آمناً. الموظف التجريبي مرتبط بالسجل 3 ورئيس القسم بالسجل 2 / التمريض.' : 'Demo role picker, not secure authentication. Employee maps to record 3; department head to record 2 / Nursing.'}</p>
+                    <p className="text-xs text-amber-800">{language === 'ar' ? 'نموذج تجريبي: اختر الدور وأدخل أي اسم مستخدم وكلمة مرور.' : 'Demo only: choose a role and enter any username and password.'}</p>
                   </div>
 
                   <div className="flex items-center">
@@ -252,7 +243,6 @@ export const LoginPage: React.FC = () => {
               >
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-text-primary">{t('reset_password_title')}</h2>
-                  <p className="text-sm text-text-secondary mt-1">{t('reset_password_subtitle')}</p>
                 </div>
 
                 {isResetSent ? (
@@ -296,7 +286,6 @@ export const LoginPage: React.FC = () => {
                           value={resetEmail}
                           onChange={(e) => setResetEmail(e.target.value)}
                           className="input-base ps-10 w-full"
-                          placeholder="name@medistaff.com"
                           required
                         />
                       </div>
@@ -330,11 +319,6 @@ export const LoginPage: React.FC = () => {
             )}
           </AnimatePresence>
 
-          <div className="mt-8 pt-6 border-t border-border-base text-center">
-            <p className="text-xs text-text-secondary">
-              &copy; 2026 <ForceLTR>REMEDIX</ForceLTR>. {t('all_rights_reserved')}
-            </p>
-          </div>
         </div>
       </motion.div>
     </div>
