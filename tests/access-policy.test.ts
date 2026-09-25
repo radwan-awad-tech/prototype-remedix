@@ -56,6 +56,9 @@ test('medical data ignores caller-supplied role and is not returned to HR or man
   }
   const u = actor('Occupational Health Officer');
   assert.ok((await occupationalHealthService.getCheckups(u,'OHO')).data.length > 0);
+  const pending = occupationalHealthService.getCheckups(u,'OHO');
+  actor('HR Officer');
+  assert.equal((await pending).status,403);
 });
 test('employee sees only own records, cannot query another payslip or submit for another employee', async () => {
   const u = actor('Employee');
