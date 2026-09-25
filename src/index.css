@@ -83,7 +83,7 @@
   input,
   textarea,
   [contenteditable='true'] {
-    cursor: text !important;
+    cursor: url('/brand/remedix-cursor-text.svg') 6 8, text !important;
   }
 
   :disabled,
