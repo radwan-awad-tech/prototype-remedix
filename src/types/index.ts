@@ -213,7 +213,7 @@ export interface AttendanceRecord {
   lateMinutes: number;
   overtimeHours: number;
   status: 'OK' | 'Late' | 'Missing Checkout' | 'Absent';
-  source: 'Device' | 'Mobile' | 'Manual';
+  source: 'Device' | 'Mobile' | 'Web' | 'Manual';
   scheduledStart?: string;
   scheduledEnd?: string;
   approver?: string;
@@ -462,11 +462,14 @@ export interface PayrollRun {
   employeeCount: number;
   totalBaseSalary: number;
   totalAllowances: number;
+  totalOvertime: number;
   totalDeductions: number;
   totalNet: number;
   approvedBy?: string;
   approvedAt?: string;
   createdAt: string;
+  createdBy?: string;
+  preparedBy?: string;
 }
 
 export interface EmployeePayrollProfile {

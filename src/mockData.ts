@@ -44,6 +44,7 @@ export const MOCK_PAYROLL_RULES: PayrollRule[] = [
   { id: 'pr-1', name: 'Overtime Rate', value: 1.5, unit: 'Multiplier', description: 'Multiplier for normal overtime hours' },
   { id: 'pr-2', name: 'Late Penalty', value: 50, unit: 'Fixed', description: 'Fixed deduction per late occurrence > 15 mins' },
   { id: 'pr-3', name: 'Unpaid Leave', value: 1, unit: 'Multiplier', description: 'Daily rate deduction for unpaid leave' },
+  { id: 'pr-4', name: 'Monthly Salary Day Basis', value: 30, unit: 'Fixed', description: 'Demo calculation basis: monthly salary divided by 30 calendar days; configure for local payroll policy before production.' },
 ];
 
 export const MOCK_PAYROLL_PROFILES: EmployeePayrollProfile[] = [
@@ -71,11 +72,12 @@ export const MOCK_PAYROLL_PROFILES: EmployeePayrollProfile[] = [
 export const MOCK_PAYROLL_RUNS: PayrollRun[] = [
   {
     id: 'run-1',
-    period: 'january_2024',
+    period: '2024-01',
     status: 'Approved',
     employeeCount: 150,
     totalBaseSalary: 450000,
     totalAllowances: 120000,
+    totalOvertime: 0,
     totalDeductions: 35000,
     totalNet: 535000,
     approvedBy: 'Sarah Mitchell',
@@ -84,13 +86,14 @@ export const MOCK_PAYROLL_RUNS: PayrollRun[] = [
   },
   {
     id: 'run-2',
-    period: 'february_2024',
+    period: '2024-02',
     status: 'Calculated',
-    employeeCount: 152,
-    totalBaseSalary: 455000,
-    totalAllowances: 122000,
-    totalDeductions: 36000,
-    totalNet: 541000,
+    employeeCount: 3,
+    totalBaseSalary: 19500,
+    totalAllowances: 5800,
+    totalOvertime: 600,
+    totalDeductions: 2000,
+    totalNet: 23900,
     createdAt: '2024-02-24',
   }
 ];
@@ -148,7 +151,7 @@ export const MOCK_PAYSLIPS: Payslip[] = [
     id: 'ps-1',
     employeeId: '1',
     employeeName: 'Sarah Mitchell',
-    period: 'january_2024',
+    period: '2024-01',
     baseSalary: 8000,
     allowances: [
       { name: 'Total Allowances', amount: 2500 }

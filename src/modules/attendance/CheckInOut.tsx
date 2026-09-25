@@ -3,12 +3,18 @@ import { motion } from 'motion/react';
 import { Clock, LogIn, LogOut, AlertCircle, Calendar } from 'lucide-react';
 import { useToast } from '../../components/ui/Toast';
 import { useTranslation } from '../../hooks/useTranslation';
+import { attendanceService } from '../../services/attendanceService';
+import { useAuth } from '../auth/AuthContext';
+import { AttendanceRecord } from '../../types';
 
 export const CheckInOut: React.FC = () => {
   const { t, language } = useTranslation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [status, setStatus] = useState<'checked_out' | 'checked_in'>('checked_out');
   const [checkInTime, setCheckInTime] = useState<string | null>(null);
+  const [punch, setPunch] = useState<AttendanceRecord | null>(null);
+  const [busy, setBusy] = useState(false);
+  const { user } = useAuth();
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -16,25 +22,33 @@ export const CheckInOut: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleCheckIn = () => {
-    const now = new Date();
-    const scheduledStart = new Date();
-    scheduledStart.setHours(8, 0, 0); // Mock 8:00 AM start
+  useEffect(() => {
+    attendanceService.getTodayPunch().then(response => {
+      if (response.success && response.data) {
+        setPunch(response.data);
+        setStatus(response.data.checkOut ? 'checked_out' : 'checked_in');
+        setCheckInTime(new Date(response.data.checkIn!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      }
+    });
+  }, []);
 
-    setStatus('checked_in');
-    setCheckInTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    
-    if (now > scheduledStart) {
-      showToast(t('check_in_success_late'), 'info');
-    } else {
-      showToast(t('check_in_success'), 'success');
-    }
+  const handleCheckIn = () => {
+    setBusy(true);
+    void attendanceService.clockIn().then(response => {
+      if (!response.success) throw new Error(response.message);
+      setPunch(response.data); setStatus('checked_in');
+      setCheckInTime(new Date(response.data.checkIn!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      showToast(response.data.lateMinutes ? t('check_in_success_late') : t('check_in_success'), response.data.lateMinutes ? 'info' : 'success');
+    }).catch(error => showToast(error.message || (language === 'ar' ? 'تعذر تسجيل الدخول.' : 'Could not record clock-in.'), 'error')).finally(() => setBusy(false));
   };
 
   const handleCheckOut = () => {
     if (status === 'checked_out') return;
-    setStatus('checked_out');
-    showToast(t('check_out_success'), 'success');
+    setBusy(true);
+    void attendanceService.clockOut().then(response => {
+      if (!response.success) throw new Error(response.message);
+      setPunch(response.data); setStatus('checked_out'); showToast(t('check_out_success'), 'success');
+    }).catch(error => showToast(error.message || (language === 'ar' ? 'تعذر تسجيل الخروج.' : 'Could not record clock-out.'), 'error')).finally(() => setBusy(false));
   };
 
   return (
@@ -52,27 +66,27 @@ export const CheckInOut: React.FC = () => {
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">{t('todays_schedule')}</h3>
-              <p className="text-sm text-gray-500">{currentTime.toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+              <p className="text-sm text-gray-500">{currentTime.toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}{user?.department ? ` · ${user.department}` : ''}</p>
             </div>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-medium ${status === 'checked_in' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-600'}`}>
+          <div className={`px-3 py-1 rounded-full text-xs font-medium ${status === 'checked_in' ? 'bg-brand-muted-teal text-brand-deep-teal' : 'bg-gray-100 text-gray-600'}`}>
             {status === 'checked_in' ? t('checked_in') : t('checked_out')}
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('assigned_shift')}</p>
+            <p className="text-xs text-gray-500 mb-1">{t('assigned_shift')}</p>
             <p className="font-medium text-gray-900">{t('morning_shift')}</p>
             <p className="text-sm text-brand-primary-end font-medium">08:00 - 16:00</p>
           </div>
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('check_in_time')}</p>
+            <p className="text-xs text-gray-500 mb-1">{t('check_in_time')}</p>
             <p className="font-medium text-gray-900">{checkInTime || '--:--'}</p>
           </div>
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('current_duration')}</p>
-            <p className="font-medium text-gray-900">{status === 'checked_in' ? `2${t('hours_short')} 15${t('minutes_short')}` : `0${t('hours_short')} 0${t('minutes_short')}`}</p>
+            <p className="text-xs text-gray-500 mb-1">{t('current_duration')}</p>
+            <p className="font-medium text-gray-900">{punch?.checkOut ? `${punch.totalHours}${t('hours_short')}` : status === 'checked_in' && punch?.checkIn ? `${Math.floor((currentTime.getTime() - new Date(punch.checkIn).getTime()) / 3600000)}${t('hours_short')} ${Math.floor(((currentTime.getTime() - new Date(punch.checkIn).getTime()) % 3600000) / 60000)}${t('minutes_short')}` : `0${t('hours_short')} 0${t('minutes_short')}`}</p>
           </div>
         </div>
       </motion.div>
@@ -97,7 +111,7 @@ export const CheckInOut: React.FC = () => {
           <div className="flex gap-4 w-full">
             <button
               onClick={handleCheckIn}
-              disabled={status === 'checked_in'}
+              disabled={status === 'checked_in' || !!punch?.checkIn || busy}
               className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl font-semibold transition-all ${
                 status === 'checked_in' 
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
@@ -109,7 +123,7 @@ export const CheckInOut: React.FC = () => {
             </button>
             <button
               onClick={handleCheckOut}
-              disabled={status === 'checked_out'}
+              disabled={status === 'checked_out' || busy}
               className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl font-semibold transition-all ${
                 status === 'checked_out' 
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 

@@ -1,4 +1,4 @@
-import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { secureService, HR, FINANCE, scopedRow, knownEmployee } from './accessGuard';
 import { withinScope } from '../modules/auth/permissions';
 import { getSessionActor } from '../modules/auth/session';
 import { MOCK_ATTENDANCE, MOCK_ATTENDANCE_CORRECTIONS } from '../mockData';
@@ -6,10 +6,52 @@ import { AttendanceRecord, AttendanceCorrection, ApiResponse } from '../types';
 import { apiClient } from './apiClient';
 
 let corrections = [...MOCK_ATTENDANCE_CORRECTIONS];
+const punchStorageKey = 'remedix-attendance-punches-v1';
+const localDateKey = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+function savedPunches(): AttendanceRecord[] {
+  try { return JSON.parse(localStorage.getItem(punchStorageKey) || '[]'); } catch { return []; }
+}
+function persistPunches(rows: AttendanceRecord[]) {
+  localStorage.setItem(punchStorageKey, JSON.stringify(rows));
+}
 
 const rawService = {
+  getTodayPunch: async (): Promise<ApiResponse<AttendanceRecord | null>> => {
+    const actor = getSessionActor()!;
+    const today = localDateKey();
+    const record = savedPunches().find(row => row.employeeId === actor.employeeId && row.date === today) || null;
+    return apiClient.get(record);
+  },
+  clockIn: async (): Promise<ApiResponse<AttendanceRecord>> => {
+    const actor = getSessionActor()!;
+    const now = new Date();
+    const today = localDateKey(now);
+    const rows = savedPunches();
+    if (rows.some(row => row.employeeId === actor.employeeId && row.date === today)) return apiClient.error('Attendance already started for today.', 409);
+    const employee = actor.employeeId ? knownEmployee(actor.employeeId) : undefined;
+    const scheduled = new Date(now); scheduled.setHours(8, 0, 0, 0);
+    const minutesLate = Math.max(0, Math.floor((now.getTime() - scheduled.getTime()) / 60000));
+    const record: AttendanceRecord = { id: `punch-${actor.employeeId}-${today}`, employeeId: actor.employeeId!, employeeNo: employee?.employeeNo || '', employeeName: actor.name, department: actor.department || employee?.department || '', date: today, checkIn: now.toISOString(), totalHours: 0, lateMinutes: minutesLate, overtimeHours: 0, status: minutesLate ? 'Late' : 'Missing Checkout', source: 'Web', scheduledStart: '08:00', scheduledEnd: '16:00', isCorrected: false };
+    rows.unshift(record); persistPunches(rows); MOCK_ATTENDANCE.unshift(record);
+    return apiClient.post(record);
+  },
+  clockOut: async (): Promise<ApiResponse<AttendanceRecord>> => {
+    const actor = getSessionActor()!;
+    const rows = savedPunches();
+    const index = rows.findIndex(row => row.employeeId === actor.employeeId && row.date === localDateKey());
+    if (index < 0 || !rows[index].checkIn || rows[index].checkOut) return apiClient.error('No open attendance punch found.', 409);
+    const now = new Date(); const start = new Date(rows[index].checkIn!);
+    const hours = Math.max(0, (now.getTime() - start.getTime()) / 3600000);
+    rows[index] = { ...rows[index], checkOut: now.toISOString(), totalHours: Math.round(hours * 100) / 100, overtimeHours: Math.max(0, Math.round((hours - 8) * 100) / 100), status: 'OK' };
+    persistPunches(rows);
+    const mockIndex = MOCK_ATTENDANCE.findIndex(row => row.id === rows[index].id);
+    if (mockIndex >= 0) MOCK_ATTENDANCE[mockIndex] = rows[index]; else MOCK_ATTENDANCE.unshift(rows[index]);
+    return apiClient.put(rows[index]);
+  },
   listAttendanceRecords: async (date?: string, department?: string): Promise<ApiResponse<AttendanceRecord[]>> => {
-    let data = [...MOCK_ATTENDANCE];
+    const saved = savedPunches();
+    const savedIds = new Set(saved.map(row => row.id));
+    let data = [...saved, ...MOCK_ATTENDANCE.filter(row => !savedIds.has(row.id))];
     if (department) {
       data = data.filter(a => a.department === department);
     }
@@ -110,6 +152,7 @@ const rawService = {
 };
 
 export const attendanceService = secureService('/attendance', rawService, {
+getTodayPunch: { roles: ['Employee'] }, clockIn: { roles: ['Employee'], validate: u => !!u.employeeId }, clockOut: { roles: ['Employee'], validate: u => !!u.employeeId },
 listAttendanceRecords: {}, listAttendanceCorrections: {},
  createAttendanceCorrection: { roles: ['HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => !!u.employeeId && d.employeeId === u.employeeId },
  approveCorrection: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },

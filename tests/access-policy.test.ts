@@ -12,12 +12,16 @@ import { dashboardService } from '../src/services/dashboardService';
 import { reportService } from '../src/services/reportService';
 import { adminService } from '../src/services/adminService';
 import { RoleType } from '../src/types';
+import { MOCK_ATTENDANCE } from '../src/mockData';
 
 function actor(role: RoleType, extra = {}) { const u = {...demoIdentity('Test', role), ...extra}; setSessionActor(u); return u; }
 afterEach(() => setSessionActor(null));
 
 test('all eight roles have a guide, unknown roles and routes fail closed', () => {
   for (const role of ROLE_ORDER) { assert.ok(canAccessPath(role, '/access')); assert.ok(canAccessPath(role, '/')); assert.equal(canAccessPath(role, '/unlisted'), false); }
+  assert.equal(canAccessPath('Employee','/reports'),true);
+  assert.equal(canAccessPath('Occupational Health Officer','/reports'),true);
+  assert.equal(canAccessPath('System Admin','/reports'),false);
   assert.equal(canAccessPath('unknown' as RoleType, '/admin'), false);
   assert.throws(() => demoIdentity('Test', 'unknown' as RoleType));
 });
@@ -92,9 +96,13 @@ test('leave requires independent manager recommendation then HR final approval',
 test('payroll requires valid transitions and a different delegated reviewer', async () => {
   const preparer = actor('Payroll Officer');
   const result = await payrollService.createRun('2026-09'); assert.equal(result.success,true); const id=result.data.id;
+  const testAttendance = ['1','2'].map((employeeId, index) => ({ id:`test-payroll-${employeeId}`, employeeId, employeeNo:`EMP-00${employeeId}`, employeeName:`Test ${employeeId}`, department:index ? 'Nursing' : 'Human Resources', date:'2026-09-10', checkIn:'08:00', checkOut:'16:00', totalHours:8, lateMinutes:0, overtimeHours:0, status:'OK' as const, source:'Device' as const, isCorrected:false }));
+  MOCK_ATTENDANCE.push(...testAttendance);
   assert.equal((await payrollService.lockRun(id)).status,403);
   assert.equal((await payrollService.approveRun(id)).status,403);
   assert.equal((await payrollService.calculateRun(id)).success,true);
+  actor('Senior Manager'); assert.equal((await payrollService.calculateRun(id)).status,403);
+  actor('Payroll Officer',{id:preparer.id});
   assert.equal((await payrollService.lockRun(id)).success,true);
   assert.equal((await payrollService.calculateRun(id)).status,403);
   actor('Accountant',{id:preparer.id}); assert.equal((await payrollService.approveRun(id)).status,403);
@@ -104,6 +112,7 @@ test('payroll requires valid transitions and a different delegated reviewer', as
   assert.equal((await payrollService.approveRun(id)).status,403);
   actor('Payroll Officer'); assert.equal((await payrollService.unlockRun(id)).status,403);
   assert.equal((await payrollService.calculateRun(id)).status,403);
+  MOCK_ATTENDANCE.splice(0, MOCK_ATTENDANCE.length, ...MOCK_ATTENDANCE.filter(row => !row.id.startsWith('test-payroll-')));
 });
 test('old global reports and approval endpoints cannot bypass scoped workflow', async () => {
   actor('HR Manager');

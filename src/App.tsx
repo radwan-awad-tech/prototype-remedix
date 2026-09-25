@@ -69,8 +69,8 @@ const AppContent = () => {
 
     if (currentPath === '/access') return <RoleAccessPage />;
     if (currentPath === '/health' && ['HR Manager','HR Officer'].includes(user.role)) return <HealthAdministrationPage />;
-    if (['/', '/reports', '/payroll', '/leaves', '/attendance'].includes(currentPath) ||
-      (!['/settings', '/profile', '/admin'].includes(currentPath) && getModuleAccess(user.role, currentPath)?.level !== 'manage')) {
+    if (currentPath === '/' || (currentPath !== '/reports' &&
+      !['/settings', '/profile', '/admin'].includes(currentPath) && getModuleAccess(user.role, currentPath)?.level !== 'manage')) {
       return <ScopedWorkspace key={`${user.id}:${currentPath}`} path={currentPath} />;
     }
     switch (currentPath) {

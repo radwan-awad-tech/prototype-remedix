@@ -20,7 +20,7 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeStatusTab, setActiveStatusTab] = useState<'Pending' | 'Approved' | 'Rejected'>('Pending');
-  const [activeRoleTab, setActiveRoleTab] = useState<'My' | 'Team' | 'All'>('My');
+  const [activeRoleTab, setActiveRoleTab] = useState<'My' | 'Team' | 'All'>(currentRole === 'HR Manager' ? 'All' : currentRole === 'Department Head' ? 'Team' : 'My');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -53,7 +53,7 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
     return requests.filter(req => {
       // Role-based filtering
       if (activeRoleTab === 'My') {
-        if (req.employeeId !== currentUser.id) return false;
+        if (req.employeeId !== currentUser.employeeId) return false;
       } else if (activeRoleTab === 'Team') {
         // Team filtering (same department)
         if (req.department !== currentUser.department) return false; 
@@ -128,7 +128,7 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
     }
   };
 
-  const canApprove = selectedRequest && (currentRole === 'HR Manager' || currentRole === 'HR Officer' || currentRole === 'Department Head') && selectedRequest.status === 'Pending';
+  const canApprove = selectedRequest && (currentRole === 'HR Manager' || currentRole === 'Department Head') && selectedRequest.status === 'Pending' && selectedRequest.employeeId !== currentUser?.employeeId && selectedRequest.stage === (currentRole === 'Department Head' ? 'Manager' : 'HR');
 
   const tableHeaderActions = (
     <div className="flex items-center gap-3">
@@ -263,7 +263,7 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
           onClose={() => setIsFormOpen(false)}
           onSubmit={async (data) => {
             try {
-              const response = await leaveService.createLeaveRequest(data);
+              const response = await leaveService.createLeaveRequest({ ...data, employeeId: currentUser?.employeeId, employeeName: currentUser?.name, department: currentUser?.department });
               if (response.success) {
                 setRequests(prev => [response.data, ...prev]);
                 setIsFormOpen(false);

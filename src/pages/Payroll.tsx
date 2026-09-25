@@ -23,7 +23,8 @@ export const PayrollPage: React.FC = () => {
     const role = user?.role;
     if (role === 'Employee' || role === 'Occupational Health Officer') return tab.id === 'payslips';
     if (role === 'Department Head') return ['review', 'payslips'].includes(tab.id);
-    if (role === 'HR Officer') return tab.id !== 'settings';
+    if (role === 'HR Officer' || role === 'Accountant') return ['review', 'history'].includes(tab.id);
+    if (role === 'Payroll Officer') return tab.id !== 'review';
     return true; // Admin, Payroll Officer, Accountant, HR Manager
   });
 

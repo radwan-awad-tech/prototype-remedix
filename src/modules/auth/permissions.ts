@@ -18,8 +18,8 @@ export const ROLE_ACCESS_POLICIES: Record<RoleType, RoleAccessPolicy> = {
   'Department Head': policy('Department Head', [m('/employees', 'view', 'department'), m('/doctors', 'view', 'department'), m('/scheduling', 'manage', 'department'), m('/leaves', 'review', 'department'), m('/attendance', 'review', 'department'), m('/licenses', 'view', 'department'), m('/recruitment', 'review', 'department'), m('/performance', 'review', 'department'), m('/reports', 'view', 'department')]),
   'Payroll Officer': policy('Payroll Officer', [m('/payroll', 'manage'), m('/attendance'), m('/leaves'), m('/reports')]),
   'Accountant': policy('Accountant', [m('/payroll', 'review'), m('/reports')]),
-  'Occupational Health Officer': policy('Occupational Health Officer', [m('/health', 'manage')]),
-  Employee: policy('Employee', [m('/scheduling', 'view', 'self'), m('/leaves', 'manage', 'self'), m('/attendance', 'manage', 'self'), m('/payroll', 'view', 'self'), m('/performance', 'view', 'self'), m('/licenses', 'view', 'self')]),
+  'Occupational Health Officer': policy('Occupational Health Officer', [m('/health', 'manage'), m('/reports', 'view', 'self')]),
+  Employee: policy('Employee', [m('/scheduling', 'view', 'self'), m('/leaves', 'manage', 'self'), m('/attendance', 'manage', 'self'), m('/payroll', 'view', 'self'), m('/performance', 'view', 'self'), m('/licenses', 'view', 'self'), m('/reports', 'view', 'self')]),
 };
 export const getModuleAccess = (role: RoleType, path: string) => ROLE_ACCESS_POLICIES[role]?.modules.find(m => m.path === path);
 export const canAccessPath = (role: RoleType, path: string) => !!getModuleAccess(role, path);

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Calendar, FileText, User, ChevronRight, AlertCircle } from 'lucide-react';
-import { LeaveType } from '../../types';
+import { LeaveRequest, LeaveType } from '../../types';
 import { TranslationKey } from '../../i18n/translations';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface LeaveRequestFormProps {
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Partial<LeaveRequest>) => void;
 }
 
 export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onSubmit }) => {
@@ -31,7 +31,7 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onS
     if (formData.startDate && formData.endDate && new Date(formData.endDate) < new Date(formData.startDate)) {
       newErrors.endDate = t('end_date_after_start');
     }
-    if (!formData.reason) newErrors.reason = t('reason_required');
+    if (!formData.reason.trim()) newErrors.reason = t('reason_required');
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -40,7 +40,10 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onS
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit(formData);
+      const start = new Date(`${formData.startDate}T00:00:00Z`);
+      const end = new Date(`${formData.endDate}T00:00:00Z`);
+      const duration = Math.floor((end.getTime() - start.getTime()) / 86400000) + 1;
+      onSubmit({ ...formData, leaveType: formData.leaveType as LeaveType, reason: formData.reason.trim(), duration });
     }
   };
 
@@ -50,7 +53,7 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onS
     <form id="leave-request-form" onSubmit={handleSubmit} className="flex flex-col h-full">
       <div className="space-y-6">
         <div className="space-y-1">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">{t('leave_type')} *</label>
+          <label className="text-xs font-semibold text-text-secondary">{t('leave_type')} *</label>
           <select 
             value={formData.leaveType}
             onChange={(e) => setFormData({ ...formData, leaveType: e.target.value as LeaveType })}
@@ -64,7 +67,7 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onS
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">{t('start_date')} *</label>
+            <label className="text-xs font-semibold text-text-secondary">{t('start_date')} *</label>
             <input 
               type="date" 
               value={formData.startDate}
@@ -74,7 +77,7 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onS
             {errors.startDate && <p className="text-[10px] text-rose-500 font-medium">{errors.startDate}</p>}
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">{t('end_date')} *</label>
+            <label className="text-xs font-semibold text-text-secondary">{t('end_date')} *</label>
             <input 
               type="date" 
               value={formData.endDate}
@@ -86,7 +89,7 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onS
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">{t('reason')} *</label>
+          <label className="text-xs font-semibold text-text-secondary">{t('reason')} *</label>
           <textarea 
             value={formData.reason}
             onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
@@ -97,7 +100,7 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onS
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">{t('contact_during_leave')}</label>
+          <label className="text-xs font-semibold text-text-secondary">{t('contact_during_leave')}</label>
           <input 
             type="text" 
             value={formData.contactDuringLeave}
@@ -108,7 +111,7 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onS
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">{t('replacement_employee')} ({t('optional')})</label>
+          <label className="text-xs font-semibold text-text-secondary">{t('replacement_employee')} ({t('optional')})</label>
           <select 
             value={formData.replacementEmployeeId}
             onChange={(e) => setFormData({ ...formData, replacementEmployeeId: e.target.value })}

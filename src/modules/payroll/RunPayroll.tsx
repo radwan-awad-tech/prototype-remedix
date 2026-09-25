@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Calculator, Lock, Unlock, FileText, Download, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Calendar, Calculator, Lock, Unlock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useToast } from '../../components/ui/Toast';
 import { payrollService } from '../../services/payrollService';
 import { PayrollRun } from '../../types';
@@ -7,19 +7,25 @@ import { PayrollRun } from '../../types';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export const RunPayroll: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { showToast } = useToast();
   const [currentRun, setCurrentRun] = useState<PayrollRun | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7));
+  const [exceptions, setExceptions] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchRun = async () => {
       try {
         const response = await payrollService.listRuns();
         if (response.success) {
-          // For demo, we pick the second one as "current"
-          setCurrentRun(response.data[1] || null);
+          setCurrentRun([...response.data].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] || null);
+          const latest = [...response.data].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+          if (latest) {
+            const reviews = await payrollService.listReviews(latest.id);
+            setExceptions(reviews.success ? reviews.data.flatMap(item => item.flags.map(flag => `${item.employeeName}: ${flag}`)) : []);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch payroll run', error);
@@ -29,12 +35,6 @@ export const RunPayroll: React.FC = () => {
     };
     fetchRun();
   }, []);
-
-  const handleImportAttendance = () => {
-    showToast(t('attendance_imported_success'), 'success');
-    // In a real app, this would trigger a backend process to fetch attendance data
-    // and update the payroll run. For now, we just show a success message.
-  };
 
   const handleCalculate = async () => {
     if (!currentRun) return;
@@ -46,6 +46,8 @@ export const RunPayroll: React.FC = () => {
         const runsRes = await payrollService.listRuns();
         if (runsRes.success) {
           setCurrentRun(runsRes.data.find(r => r.id === currentRun.id) || null);
+          const reviews = await payrollService.listReviews(currentRun.id);
+          setExceptions(reviews.success ? reviews.data.flatMap(item => item.flags.map(flag => `${item.employeeName}: ${flag}`)) : []);
         }
       } else {
         showToast(response.message || t('calc_failed'), 'error');
@@ -101,9 +103,10 @@ export const RunPayroll: React.FC = () => {
 
   const handleCreateRun = async () => {
     try {
-      const response = await payrollService.createRun('march_2024');
+      const response = await payrollService.createRun(period);
       if (response.success) {
         setCurrentRun(response.data);
+        setExceptions([]);
         showToast(t('run_created_success'), 'success');
       } else {
         showToast(response.message || t('run_create_failed'), 'error');
@@ -121,10 +124,10 @@ export const RunPayroll: React.FC = () => {
           <p className="text-sm text-gray-500">{t('run_payroll_subtitle')}</p>
         </div>
         <div className="flex gap-3">
-          <div className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700">
+          <label className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700">
             <Calendar className="w-4 h-4" />
-            {t('february_2024')}
-          </div>
+            <input type="month" value={period} onChange={event => setPeriod(event.target.value)} className="bg-transparent outline-none" aria-label={t('period')} />
+          </label>
           <button 
             onClick={handleCreateRun}
             className="px-4 py-2 btn-gradient-primary rounded-lg text-sm font-medium shadow-sm"
@@ -144,7 +147,7 @@ export const RunPayroll: React.FC = () => {
             <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">{t('current_run_status')}</h3>
+                  <h3 className="text-sm font-semibold text-gray-900">{t('current_run_status')}</h3>
                   <div className={`mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(currentRun.status)}`}>
                     {currentRun.status === 'Calculated' && <CheckCircle2 className="w-3 h-3" />}
                     {currentRun.status === 'Locked' && <Lock className="w-3 h-3" />}
@@ -152,15 +155,16 @@ export const RunPayroll: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-end">
-                  <p className="text-xs text-gray-500 uppercase">{t('period')}</p>
+                  <p className="text-xs text-gray-500">{t('period')}</p>
                   <p className="text-lg font-bold text-gray-900">{t(currentRun.period.toLowerCase() as any)}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
                 {[
                   { label: t('base_salary'), value: `$${currentRun.totalBaseSalary.toLocaleString()}`, color: 'text-gray-900' },
                   { label: t('total_allowances'), value: `$${currentRun.totalAllowances.toLocaleString()}`, color: 'text-green-600' },
+                  { label: t('overtime'), value: `$${currentRun.totalOvertime.toLocaleString()}`, color: 'text-brand-deep-teal' },
                   { label: t('total_deductions'), value: `-$${currentRun.totalDeductions.toLocaleString()}`, color: 'text-red-600' },
                   { label: t('net_payable'), value: `$${currentRun.totalNet.toLocaleString()}`, color: 'text-brand-primary-end' },
                 ].map((stat, i) => (
@@ -172,13 +176,6 @@ export const RunPayroll: React.FC = () => {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <button 
-                  onClick={handleImportAttendance}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <Download className="w-4 h-4" />
-                  {t('import_attendance')}
-                </button>
                 <button 
                   onClick={handleCalculate}
                   disabled={isCalculating || currentRun.status === 'Locked'}
@@ -216,16 +213,16 @@ export const RunPayroll: React.FC = () => {
             </div>
           </div>
 
+          {exceptions.length > 0 && <div className="lg:col-span-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><h3 className="font-semibold">{t('exceptions_found')} · {exceptions.length}</h3><ul className="mt-2 list-disc ps-5">{exceptions.map((exception, index) => <li key={`${exception}-${index}`}>{exception}</li>)}</ul><p className="mt-2">{language === 'ar' ? 'تعالج الاستثناءات قبل قفل الدورة.' : 'Resolve these exceptions before locking the run.'}</p></div>}
+
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">{t('run_checklist')}</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">{t('run_checklist')}</h3>
               <div className="space-y-4">
                 {[
-                  { label: t('attendance_imported'), done: true },
-                  { label: t('leave_deductions_applied'), done: true },
-                  { label: t('overtime_calculated'), done: true },
-                  { label: t('allowances_processed'), done: true },
-                  { label: t('tax_social_security'), done: false },
+                  { label: t('calculate_payroll'), done: ['Calculated','Locked','Approved'].includes(currentRun.status) },
+                  { label: t('lock_run'), done: ['Locked','Approved'].includes(currentRun.status) },
+                  { label: t('payroll_review'), done: currentRun.status === 'Approved' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center ${item.done ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
@@ -237,18 +234,7 @@ export const RunPayroll: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">{t('quick_links')}</h3>
-              <div className="space-y-2">
-                <button className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg text-sm text-gray-600 transition-colors">
-                  <span className="flex items-center gap-2"><FileText className="w-4 h-4" /> {t('view_draft_sheet')}</span>
-                  <Download className="w-3 h-3" />
-                </button>
-                <button className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg text-sm text-gray-600 transition-colors">
-                  <span className="flex items-center gap-2"><Calculator className="w-4 h-4" /> {t('tax_rules')}</span>
-                </button>
-              </div>
-            </div>
+            {currentRun.status === 'Calculated' && !currentRun.preparedBy && <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">{language === 'ar' ? 'هذه دورة قديمة ولا تحمل هوية المُحضّر؛ لا يمكن قفلها أو اعتمادها. أنشئ دورة جديدة لتوثيق المسؤول عن التحضير.' : 'This legacy run has no recorded preparer and cannot be locked or approved. Create a new run to record its preparer.'}</p>}
           </div>
         </div>
       ) : (

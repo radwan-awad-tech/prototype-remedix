@@ -35,7 +35,7 @@ export const AttendanceLog: React.FC<AttendanceLogProps> = ({ userRole }) => {
           
           // Role-based record-level visibility
           if (userRole === 'Employee') {
-            filteredData = filteredData.filter(record => record.employeeId === user?.id || record.employeeNo === user?.employeeNo);
+            filteredData = filteredData.filter(record => record.employeeId === user?.employeeId);
           }
           
           setAttendance(filteredData);

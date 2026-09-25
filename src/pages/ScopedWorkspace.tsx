@@ -77,7 +77,7 @@ const columns: Record<string, [string,string,string][]> = {
   '/licenses': [['employeeName','الموظف','Employee'],['name','الترخيص','Credential'],['expiryDate','الانتهاء','Expiry'],['verificationStatus','التحقق','Verification'],['status','الحالة','Status']],
   '/recruitment': [['title','الوظيفة','Position'],['department','القسم','Department'],['vacancies','الشواغر','Vacancies'],['status','الحالة','Status']],
   '/performance': [['employeeName','الموظف','Employee'],['cycleName','الدورة','Cycle'],['overallScore','التقييم','Score'],['status','الحالة','Status']],
-  '/payroll': [['period','الفترة','Period'],['employeeCount','الموظفون','Employees'],['totalNet','صافي الدورة','Run net'],['netSalary','صافي راتبي','My net pay'],['status','الحالة','Status']],
+  '/payroll': [['period','الفترة','Period'],['employeeCount','الموظفون','Employees'],['totalOvertime','الإضافي','Overtime'],['totalNet','صافي الدورة','Run net'],['netSalary','صافي راتبي','My net pay'],['status','الحالة','Status']],
 };
 export const ScopedWorkspace: React.FC<{ path: string }> = ({ path }) => {
   const { user } = useAuth();

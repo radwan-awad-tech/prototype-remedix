@@ -1,4 +1,4 @@
-import { secureService, HR, FINANCE, scopedRow } from './accessGuard';
+import { secureService, HR, FINANCE, scopedRow, knownEmployee } from './accessGuard';
 import { withinScope } from '../modules/auth/permissions';
 import { getSessionActor } from '../modules/auth/session';
 import { MOCK_LEAVE_REQUESTS, MOCK_LEAVE_BALANCES } from '../mockData';
@@ -36,8 +36,15 @@ const rawService = {
   },
 
   createLeaveRequest: async (data: Partial<LeaveRequest>): Promise<ApiResponse<LeaveRequest>> => {
+    const actor = getSessionActor()!;
+    const employee = actor.employeeId ? knownEmployee(actor.employeeId) : undefined;
+    const start = new Date(`${data.startDate}T00:00:00Z`);
+    const end = new Date(`${data.endDate}T00:00:00Z`);
+    const duration = Math.floor((end.getTime() - start.getTime()) / 86400000) + 1;
     const newRequest = { 
       ...data, 
+      employeeId: actor.employeeId!, employeeName: actor.name, employeeNo: employee?.employeeNo || '', department: actor.department || employee?.department || '',
+      duration,
       id: `LR-${Math.floor(Math.random() * 1000)}`,
       status: 'Pending',
       stage: 'Manager',
@@ -62,6 +69,6 @@ const rawService = {
 
 export const leaveService = secureService('/leaves', rawService, {
 listLeaveRequests: {}, listLeaveBalances: {}, listLeavePolicies: { metadata: true },
- createLeaveRequest: { roles: ['HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => !!u.employeeId && d.employeeId === u.employeeId },
+ createLeaveRequest: { roles: ['HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => { const validDate = (value?: string) => { if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false; const parsed = new Date(`${value}T00:00:00Z`); return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0,10) === value; }; return !!u.employeeId && d.employeeId === u.employeeId && validDate(d.startDate) && validDate(d.endDate) && d.endDate! >= d.startDate! && !!d.reason?.trim() && d.reason.length <= 500; } },
  updateLeaveStatus: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => leaveRequests.find(r => r.id === id), validate: (u,id,status) => { const r = leaveRequests.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && ['Approved','Rejected'].includes(status) && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } }
 });

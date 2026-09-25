@@ -7,13 +7,16 @@ import { PayrollItem, DataTableColumn } from '../../types';
 import { useAuth } from '../auth/AuthContext';
 
 import { useTranslation } from '../../hooks/useTranslation';
+import { PAYROLL_APPROVERS } from '../auth/permissions';
+import { PayrollRun } from '../../types';
 
 export const PayrollReview: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [reviews, setReviews] = useState<PayrollItem[]>([]);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  const [currentRun, setCurrentRun] = useState<PayrollRun | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isApproving, setIsApproving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,9 +27,10 @@ export const PayrollReview: React.FC = () => {
       try {
         const dept = user?.role === 'Department Head' ? user?.department : undefined;
         const runsRes = await payrollService.listRuns();
-        if (runsRes.success && runsRes.data.length > 1) {
-          const run = runsRes.data[1]; // Using the same logic as RunPayroll
+        if (runsRes.success && runsRes.data.length) {
+          const run = [...runsRes.data].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).find(item => ['Calculated','Locked'].includes(item.status));
           if (run) {
+            setCurrentRun(run);
             setCurrentRunId(run.id);
             const reviewsRes = await payrollService.listReviews(run.id, dept);
             if (reviewsRes.success) {
@@ -130,6 +134,7 @@ export const PayrollReview: React.FC = () => {
       const response = await payrollService.approveRun(currentRunId);
       if (response.success) {
         showToast(t('approve_success'), 'success');
+        setCurrentRun(previous => previous ? { ...previous, status: 'Approved' } : previous);
       } else {
         showToast(response.message || t('approve_failed'), 'error');
       }
@@ -150,7 +155,7 @@ export const PayrollReview: React.FC = () => {
         <div className="flex gap-3">
           <button 
             onClick={handleApprove}
-            disabled={isApproving || !currentRunId}
+            disabled={isApproving || !currentRunId || currentRun?.status !== 'Locked' || currentRun.preparedBy === user?.id || !PAYROLL_APPROVERS.includes(user?.role || 'System Admin')}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
           >
             <CheckCircle2 className="w-4 h-4" />
@@ -165,6 +170,8 @@ export const PayrollReview: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {currentRun && <p className="text-sm text-text-secondary">{t('period')}: <span dir="ltr">{currentRun.period}</span> · {currentRun.status}{currentRun.status !== 'Locked' && ` · ${language === 'ar' ? 'بانتظار إقفال المُحضّر للدورة قبل المراجعة.' : 'The preparer must lock this run before review.'}`}{currentRun.status === 'Locked' && currentRun.preparedBy === user?.id && ` · ${language === 'ar' ? 'لا يمكن لمُحضّر الدورة اعتمادها.' : 'The preparer cannot approve this run.'}`}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
