@@ -11,6 +11,62 @@ import { MODULE_NAMES } from './RoleAccess';
 import { leaveService } from '../services/leaveService';
 import { attendanceService } from '../services/attendanceService';
 import { payrollService } from '../services/payrollService';
+import { RoleType } from '../types';
+
+const dashboardRecipes: Record<RoleType, { path: string; field: string; ar: string; en: string }[]> = {
+  'Senior Manager': [
+    { path:'/employees', field:'department', ar:'توزيع القوى العاملة حسب القسم', en:'Workforce by department' },
+    { path:'/recruitment', field:'status', ar:'حالة الشواغر والتوظيف', en:'Hiring pipeline status' },
+    { path:'/payroll', field:'period', ar:'صافي الرواتب حسب الدورة', en:'Net payroll by period' },
+  ],
+  'System Admin': [],
+  'HR Manager': [
+    { path:'/employees', field:'department', ar:'توزيع الموظفين حسب القسم', en:'Employees by department' },
+    { path:'/recruitment', field:'status', ar:'حالة الشواغر والتوظيف', en:'Hiring pipeline status' },
+    { path:'/leaves', field:'stage', ar:'طلبات الإجازات حسب مرحلة الاعتماد', en:'Leave requests by approval stage' },
+    { path:'/health', field:'kind', ar:'متابعة صحة الموظفين إدارياً', en:'Employee health administration' },
+    { path:'/payroll', field:'period', ar:'صافي الرواتب حسب الدورة', en:'Net payroll by period' },
+  ],
+  'HR Officer': [
+    { path:'/recruitment', field:'status', ar:'حالة الشواغر والتوظيف', en:'Hiring pipeline status' },
+    { path:'/licenses', field:'verificationStatus', ar:'حالة التحقق من التراخيص', en:'Credential verification status' },
+    { path:'/health', field:'kind', ar:'متابعة الصحة المهنية إدارياً', en:'Occupational health administration' },
+  ],
+  'Department Head': [
+    { path:'/scheduling', field:'shiftTypeName', ar:'توزيع المناوبات في القسم', en:'Department shifts' },
+    { path:'/leaves', field:'stage', ar:'طلبات الإجازات حسب المرحلة', en:'Leave requests by stage' },
+    { path:'/attendance', field:'status', ar:'طلبات تصحيح الحضور', en:'Attendance corrections' },
+  ],
+  'Payroll Officer': [
+    { path:'/payroll', field:'period', ar:'صافي الرواتب حسب الدورة', en:'Net payroll by period' },
+    { path:'/attendance', field:'status', ar:'تصحيحات الحضور قيد المتابعة', en:'Attendance corrections to review' },
+  ],
+  Accountant: [
+    { path:'/payroll', field:'status', ar:'دورات الرواتب حسب حالة المراجعة', en:'Payroll runs by review status' },
+    { path:'/payroll', field:'period', ar:'صافي الرواتب حسب الدورة', en:'Net payroll by period' },
+  ],
+  'Occupational Health Officer': [
+    { path:'/health', field:'status', ar:'الفحوص المهنية حسب الحالة', en:'Occupational checkups by status' },
+    { path:'/health', field:'type', ar:'الفحوص المهنية حسب النوع', en:'Checkups by type' },
+  ],
+  Employee: [
+    { path:'/scheduling', field:'shiftTypeName', ar:'مناوباتي حسب النوع', en:'My shifts by type' },
+    { path:'/payroll', field:'period', ar:'صافي راتبي حسب الدورة', en:'My net pay by period' },
+    { path:'/performance', field:'status', ar:'تقييماتي حسب الحالة', en:'My reviews by status' },
+  ],
+};
+
+function dashboardSeries(path: string, field: string, rows: Record<string, any>[]) {
+  if (path === '/payroll' && field === 'period') {
+    return rows.map(row => ({ name: row.period, value: Number(row.totalNet ?? row.netSalary ?? 0) }));
+  }
+  const counts = new Map<string, number>();
+  rows.forEach(row => {
+    const value = String(row[field] || 'غير محدد');
+    counts.set(value, (counts.get(value) || 0) + 1);
+  });
+  return [...counts].map(([name, value]) => ({ name, value }));
+}
 
 const columns: Record<string, [string,string,string][]> = {
   '/employees': [['firstName','الاسم','First name'],['lastName','الكنية','Last name'],['department','القسم','Department'],['position','الوظيفة','Position'],['status','الحالة','Status']],
@@ -31,8 +87,7 @@ export const ScopedWorkspace: React.FC<{ path: string }> = ({ path }) => {
   const [rows, setRows] = useState<Record<string, any>[]>([]);
   const [reviewRows, setReviewRows] = useState<Record<string, any>[]>([]);
   const [reviewId, setReviewId] = useState('');
-  const [focusRows, setFocusRows] = useState<Record<string, any>[]>([]);
-  const [focusPath, setFocusPath] = useState('');
+  const [dashboardCharts, setDashboardCharts] = useState<{ title: string; path: string; data: {name:string;value:number}[]; amount: boolean }[]>([]);
   const [counts, setCounts] = useState<{name: string; count: number; path: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -44,14 +99,17 @@ export const ScopedWorkspace: React.FC<{ path: string }> = ({ path }) => {
   const say = (a: string, e: string) => ar ? a : e;
   useEffect(() => {
     let cancelled = false;
-    setRows([]); setCounts([]); setFocusRows([]); setReviewRows([]); setReviewId(''); setLoading(true); setMessage('');
+    setRows([]); setCounts([]); setDashboardCharts([]); setReviewRows([]); setReviewId(''); setLoading(true); setMessage('');
     const paths = ROLE_ACCESS_POLICIES[user!.role].modules.map(m => m.path).filter(p => !!columns[p] || (p === '/health' && (FULL_HEALTH_ROLES.includes(user!.role) || HR_HEALTH_ROLES.includes(user!.role))));
     (overview ? Promise.all(paths.map(async p => ({path: p, name: MODULE_NAMES[p][ar ? 0 : 1], records: await loadWorkspace(p)}))).then(data => {
       if (cancelled) return;
       setCounts(data.map(d => ({ path:d.path, name:d.name, count:d.records.length })));
-      const preferred = ['Payroll Officer','Accountant','Employee'].includes(user!.role) ? '/payroll' : user!.role === 'Occupational Health Officer' ? '/health' : '/leaves';
-      const focus = data.find(d => d.path === preferred);
-      setFocusPath(preferred); setFocusRows(focus?.records || []);
+      const recipes = dashboardRecipes[user!.role];
+      setDashboardCharts(recipes.flatMap(recipe => {
+        const source = data.find(d => d.path === recipe.path)?.records || [];
+        const series = dashboardSeries(recipe.path, recipe.field, source);
+        return series.length ? [{ title: recipe[ar ? 'ar' : 'en'], path: recipe.path, data: series, amount: recipe.path === '/payroll' && recipe.field === 'period' }] : [];
+      }));
     }) : loadWorkspace(path).then(data => { if (!cancelled) setRows(data); }))
       .catch(() => { if (!cancelled) setMessage(say('تعذر تحميل البيانات المسموح بها.', 'Could not load authorized records.')); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -65,7 +123,6 @@ export const ScopedWorkspace: React.FC<{ path: string }> = ({ path }) => {
   }
   const canReview = (row: Record<string, any>) => ['Senior Manager','HR Manager','Department Head'].includes(user!.role) && row.status === 'Pending' && row.employeeId !== user!.employeeId && row.stage === (user!.role === 'Department Head' ? 'Manager' : 'HR');
   const stateCounts = Object.entries(rows.reduce((a, row) => { const key = row.status || 'Issued'; a[key] = (a[key] || 0) + 1; return a; }, {} as Record<string,number>)).map(([name,count]) => ({name,count}));
-  const focusChart = focusPath === '/payroll' ? focusRows.map(r => ({name:r.period, value:r.totalNet ?? r.netSalary ?? 0})) : Object.entries(focusRows.reduce((a,r) => { const label = r.status === 'Pending' ? `${r.status} / ${r.stage}` : r.status; a[label] = (a[label] || 0) + 1; return a; }, {} as Record<string,number>)).map(([name,value]) => ({name,value}));
   const payrollCols = user!.role === 'Employee' ? columns['/payroll'].filter(c => ['period','netSalary'].includes(c[0])) : columns['/payroll'].filter(c => c[0] !== 'netSalary');
   const visibleColumns = path === '/payroll' ? payrollCols : columns[path] || [];
   return <section className="space-y-6">
@@ -75,8 +132,8 @@ export const ScopedWorkspace: React.FC<{ path: string }> = ({ path }) => {
     {message && <p role="alert" className="p-4 rounded-xl bg-amber-50 text-amber-900">{message}</p>}
     {loading ? <p role="status">{say('جارٍ تحميل السجلات المسموح بها…','Loading authorized records…')}</p> : overview ? <>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{counts.map(c => <button onClick={() => navigate(c.path)} key={c.path} className="card-base p-5 text-start"><p className="text-sm text-text-secondary">{c.name}</p><p className="text-3xl font-bold text-brand-deep-teal mt-3">{c.count}</p><p className="text-xs mt-2">{say('سجلات متاحة لدورك','Records available to your role')}</p></button>)}</div>
-      {focusChart.length > 0 && <div className="card-base p-6"><h2 className="font-bold mb-4">{focusPath === '/payroll' ? say('صافي الرواتب حسب الفترة — أرقام تجريبية','Net payroll by period — demo amounts') : focusPath === '/health' ? say('متابعة مواعيد الفحوص حسب الحالة','Health check appointments by status') : say('الإجازات حسب الحالة ومرحلة الموافقة','Leave by status and approval stage')}</h2><LocalizedBarChart data={focusChart} dataKey="value" language={language} amount={focusPath === '/payroll'} metricLabel={focusPath === '/payroll' ? say('الصافي', 'Net amount') : say('عدد السجلات', 'Records')} color="#0E7875" /></div>}
-      {counts.length > 0 ? <div className="card-base p-6"><h2 className="font-bold mb-5">{say('حجم السجلات ضمن نطاقك — ليست مؤشرات سريرية','Record volume within your scope — not clinical metrics')}</h2><LocalizedBarChart data={counts} dataKey="count" language={language} metricLabel={say('عدد السجلات', 'Records')} /></div> : <div className="card-base p-6"><p>{say('حساب تقني: لا يتم تحميل بيانات موظفين أو رواتب أو ملفات صحية.','Technical account: no employee, salary or health records are loaded.')}</p><button onClick={() => navigate('/admin')} className="mt-4 bg-brand-deep-teal text-white px-5 py-3 rounded-xl">{say('إدارة النظام','Administration')}</button></div>}
+      {dashboardCharts.length > 0 && <div className="grid gap-5 xl:grid-cols-2">{dashboardCharts.map((chart,index) => <div key={`${chart.path}:${chart.title}`} className="card-base p-5"><h2 className="font-bold mb-4">{chart.title}</h2><LocalizedBarChart data={chart.data} dataKey="value" language={language} amount={chart.amount} metricLabel={chart.amount ? say('الصافي','Net amount') : say('عدد السجلات','Records')} color={index % 2 ? '#0F766E' : '#004D4D'} /></div>)}</div>}
+      {counts.length === 0 && <div className="card-base p-6"><p>{say('حساب تقني: لا يتم تحميل بيانات موظفين أو رواتب أو ملفات صحية.','Technical account: no employee, salary or health records are loaded.')}</p><button onClick={() => navigate('/admin')} className="mt-4 bg-brand-deep-teal text-white px-5 py-3 rounded-xl">{say('إدارة النظام','Administration')}</button></div>}
     </> : path === '/health' ? <article className="card-base p-8"><h2 className="font-bold text-xl">{say('توصيات العمل المصرّح بمشاركتها','Released work recommendations')}</h2><p className="mt-4 leading-8">{say('لا توجد توصيات معتمدة للمشاركة في البيانات الحالية. لا نعرض نتائج الفحوص أو الإصابات أو ملاحظات الطبيب، ولا نستنتج اللياقة للعمل من حالة موعد الفحص.','No released recommendations exist in the current data. Test results, incidents and clinical notes are not shared, and fitness is never inferred from appointment status.')}</p></article> : <>
       {rows.length > 0 && <div className="card-base p-5"><h2 className="font-semibold mb-3">{say('توزيع حالات السجلات المتاحة','Status of accessible records')}</h2><LocalizedBarChart data={stateCounts} dataKey="count" language={language} metricLabel={say('عدد السجلات', 'Records')} color="#0E7875" /></div>}
       {path === '/payroll' && PAYROLL_PREPARERS.includes(user!.role) && <form className="card-base p-4 flex gap-3 flex-wrap" onSubmit={e => { e.preventDefault(); const f = new FormData(e.currentTarget); void perform(() => payrollService.createRun(String(f.get('period')))); }}><label>{say('دورة جديدة','New run')} <input type="month" name="period" required className="border rounded-lg p-2 mx-2"/></label><button disabled={busy} className="bg-brand-deep-teal text-white rounded-lg px-5 py-2">{say('إنشاء','Create')}</button></form>}

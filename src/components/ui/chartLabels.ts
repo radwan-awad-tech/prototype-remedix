@@ -6,6 +6,12 @@ const states: Record<string, string> = {
   Active: 'نشط', Inactive: 'غير نشط', Published: 'منشور', Open: 'مفتوح',
   Closed: 'مغلق', Valid: 'ساري', Expiring: 'قارب الانتهاء', Expired: 'منتهي',
   Verified: 'تم التحقق', Submitted: 'مقدّم', Finalized: 'نهائي',
+  Nursing: 'التمريض', Emergency: 'الطوارئ', Radiology: 'الأشعة', Pediatrics: 'الأطفال',
+  Administration: 'الإدارة', Cardiology: 'القلبية', Laboratory: 'المختبر', 'Human Resources': 'الموارد البشرية',
+  'Morning Shift': 'مناوبة صباحية', 'Evening Shift': 'مناوبة مسائية', 'Night Shift': 'مناوبة ليلية',
+  Morning: 'صباحية', Evening: 'مسائية', Night: 'ليلية',
+  checkup: 'فحوص', vaccination: 'تطعيمات', incident: 'حالات وإصابات', 'follow-up': 'متابعات',
+  'Pre-employment': 'ما قبل التوظيف', Periodic: 'دوري', 'Return to Work': 'عودة إلى العمل', Exit: 'إنهاء خدمة',
 };
 const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
 

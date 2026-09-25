@@ -21,3 +21,10 @@ test('department labels and unknown values are preserved without invalid dates',
   assert.equal(chartLabel('2024-13', 'ar'), '2024-13');
   assert.equal(chartLabel('', 'ar'), 'غير محدد');
 });
+
+test('Arabic dashboards localize hospital departments, shifts and health categories', () => {
+  assert.equal(chartLabel('Human Resources', 'ar'), 'الموارد البشرية');
+  assert.equal(chartLabel('Morning Shift', 'ar'), 'مناوبة صباحية');
+  assert.equal(chartLabel('checkup', 'ar'), 'فحوص');
+  assert.equal(chartLabel('Cardiology', 'ar'), 'القلبية');
+});

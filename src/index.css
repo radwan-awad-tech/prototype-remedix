@@ -47,7 +47,13 @@
     @apply bg-bg-main text-text-primary antialiased;
     font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
     min-width: 320px;
-    cursor: url('/brand/remedix-cursor.svg') 3 2, auto;
+  }
+
+  /* Keep the branded pointer consistent; utility classes such as cursor-pointer
+     must not silently replace it with the browser default. */
+  body,
+  body * {
+    cursor: url('/brand/remedix-cursor.svg') 3 2, auto !important;
   }
 
   h1,
@@ -71,13 +77,18 @@
   a,
   select,
   [role='button'] {
-    cursor: url('/brand/remedix-cursor.svg') 3 2, pointer;
+    cursor: url('/brand/remedix-cursor-hand.svg') 10 3, pointer !important;
   }
 
   input,
   textarea,
   [contenteditable='true'] {
-    cursor: text;
+    cursor: text !important;
+  }
+
+  :disabled,
+  [aria-disabled='true'] {
+    cursor: url('/brand/remedix-cursor.svg') 3 2, auto !important;
   }
 
   ::selection {
