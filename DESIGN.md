@@ -18,6 +18,8 @@ Remedix is a practical hospital workforce and operations workspace. Interfaces s
 - Leave requests use the established detailed drawer form, with dates, leave type, reason, optional contact and replacement fields.
 - Reports are purpose-specific cards with a real print-to-PDF flow and only authorized, scoped fields. Empty data is shown honestly, not fabricated.
 - Role dashboards and reports must reflect each role's actual duties and authorized records; never reuse a universal dashboard merely to fill space.
+- Leave, attendance, and payroll routes keep their task-specific native screens for every authorized role. Scope tabs, self-service actions, review buttons, and department data to the active role instead of replacing review/view roles with a generic workspace.
+- Any demo account tied to a personnel record can clock in/out for itself; punch timestamps are system-generated, and employee IDs—not account IDs—key personal attendance and leave views.
 - Arabic screens use RTL layout and localized headings/columns. Keep numeric values and timestamps readable and avoid clipping charts or tables.
 - Payroll actions must make workflow state explicit and preserve maker/checker separation. Do not present unimplemented imports, validations, or payments as completed.
 

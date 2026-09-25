@@ -24,6 +24,12 @@ export const ROLE_ACCESS_POLICIES: Record<RoleType, RoleAccessPolicy> = {
 export const getModuleAccess = (role: RoleType, path: string) => ROLE_ACCESS_POLICIES[role]?.modules.find(m => m.path === path);
 export const canAccessPath = (role: RoleType, path: string) => !!getModuleAccess(role, path);
 export const getLandingPath = (role: RoleType) => ROLE_ACCESS_POLICIES[role]?.landingPath || '/profile';
+const NATIVE_WORKFLOW_PATHS = new Set(['/reports', '/leaves', '/attendance', '/payroll']);
+export function shouldUseScopedWorkspace(role: RoleType, path: string): boolean {
+  if (path === '/') return true;
+  if (NATIVE_WORKFLOW_PATHS.has(path) || ['/settings', '/profile', '/admin'].includes(path)) return false;
+  return getModuleAccess(role, path)?.level !== 'manage';
+}
 export interface RoutePermission { path: string; allowedRoles: RoleType[] }
 export const ROUTE_PERMISSIONS: RoutePermission[] = [...new Set(ROLE_ORDER.flatMap(r => ROLE_ACCESS_POLICIES[r].modules.map(m => m.path)))].map(path => ({ path, allowedRoles: ROLE_ORDER.filter(r => canAccessPath(r, path)) }));
 

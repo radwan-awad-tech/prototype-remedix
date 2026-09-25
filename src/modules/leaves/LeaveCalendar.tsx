@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { MOCK_LEAVE_REQUESTS } from '../../mockData';
 import { RoleType } from '../../types';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface LeaveCalendarProps {
   currentRole: RoleType;
   currentUserId: string;
+  department?: string;
 }
 
-export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({ currentRole, currentUserId }) => {
+export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({ currentRole, currentUserId, department }) => {
+  const { language } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date(2024, 2, 1)); // March 2024
 
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
 
-  const monthName = currentMonth.toLocaleString('default', { month: 'long' });
+  const locale = language === 'ar' ? 'ar-SA' : 'en-US';
+  const monthName = currentMonth.toLocaleString(locale, { month: 'long' });
   const year = currentMonth.getFullYear();
+  const changeMonth = (offset: number) => setCurrentMonth(month => new Date(month.getFullYear(), month.getMonth() + offset, 1));
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
@@ -23,7 +28,7 @@ export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({ currentRole, curre
   const filteredRequests = MOCK_LEAVE_REQUESTS.filter(req => {
     if (req.status !== 'Approved') return false;
     if (currentRole === 'Employee') return req.employeeId === currentUserId;
-    // Dept Head and HR see more (mock filtering)
+    if (currentRole === 'Department Head') return req.department === department;
     return true;
   });
 
@@ -40,30 +45,20 @@ export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({ currentRole, curre
         <div className="flex items-center gap-4">
           <h2 className="text-xl font-bold text-text-primary">{monthName} {year}</h2>
           <div className="flex items-center gap-1">
-            <button className="p-2 hover:bg-bg-main rounded-lg border border-border-base text-text-secondary transition-colors">
+            <button onClick={() => changeMonth(-1)} aria-label={language === 'ar' ? 'الشهر السابق' : 'Previous month'} className="p-2 hover:bg-bg-main rounded-lg border border-border-base text-text-secondary transition-colors">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button className="p-2 hover:bg-bg-main rounded-lg border border-border-base text-text-secondary transition-colors">
+            <button onClick={() => changeMonth(1)} aria-label={language === 'ar' ? 'الشهر التالي' : 'Next month'} className="p-2 hover:bg-bg-main rounded-lg border border-border-base text-text-secondary transition-colors">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <select className="px-3 py-2 bg-white border border-border-base rounded-lg text-sm text-text-secondary outline-none">
-            <option>All Departments</option>
-            <option>Nursing</option>
-            <option>Emergency</option>
-          </select>
-          <button className="p-2 bg-white border border-border-base rounded-lg text-text-secondary hover:bg-bg-main transition-colors">
-            <Filter className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
       <div className="card-base overflow-hidden">
         <div className="grid grid-cols-7 bg-bg-main/50 border-b border-border-base">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-            <div key={d} className="p-3 text-center text-[10px] font-bold text-text-secondary uppercase tracking-widest">
+          {Array.from({ length: 7 }, (_, day) => new Date(2024, 2, 3 + day).toLocaleDateString(locale, { weekday: 'short' })).map((d, index) => (
+            <div key={`${d}-${index}`} className="p-3 text-center text-[10px] font-bold text-text-secondary uppercase tracking-widest">
               {d}
             </div>
           ))}

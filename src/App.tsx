@@ -19,12 +19,11 @@ import { AuthProvider, useAuth } from './modules/auth/AuthContext';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import { LoginPage } from './modules/auth/LoginPage';
 import { AccessDeniedPage } from './modules/auth/AccessDeniedPage';
-import { canAccessPath, getLandingPath } from './modules/auth/permissions';
+import { canAccessPath, getLandingPath, shouldUseScopedWorkspace } from './modules/auth/permissions';
 import { AppShell } from './layout/AppShell';
 import { ToastProvider } from './components/ui/Toast';
 import { ScopedWorkspace } from './pages/ScopedWorkspace';
 import { RoleAccessPage } from './pages/RoleAccess';
-import { getModuleAccess } from './modules/auth/permissions';
 import { HealthAdministrationPage } from './pages/HealthAdministration';
 
 const AppContent = () => {
@@ -69,8 +68,7 @@ const AppContent = () => {
 
     if (currentPath === '/access') return <RoleAccessPage />;
     if (currentPath === '/health' && ['HR Manager','HR Officer'].includes(user.role)) return <HealthAdministrationPage />;
-    if (currentPath === '/' || (currentPath !== '/reports' &&
-      !['/settings', '/profile', '/admin'].includes(currentPath) && getModuleAccess(user.role, currentPath)?.level !== 'manage')) {
+    if (shouldUseScopedWorkspace(user.role, currentPath)) {
       return <ScopedWorkspace key={`${user.id}:${currentPath}`} path={currentPath} />;
     }
     switch (currentPath) {
@@ -78,7 +76,7 @@ const AppContent = () => {
       case '/employees': return <EmployeesPage />;
       case '/scheduling': return <SchedulingPage />;
       case '/leaves': return <LeavesPage />;
-      case '/attendance': return <AttendancePage userRole={user.role} />;
+      case '/attendance': return <AttendancePage userRole={user.role} canPunch={!!user.employeeId} />;
       case '/licenses': return <LicensesPage userRole={user.role} />;
       case '/doctors': return <DoctorsPage />;
       case '/recruitment': return <RecruitmentPage />;

@@ -31,7 +31,7 @@ export const LeaveBalances: React.FC<LeaveBalancesProps> = ({ currentRole }) => 
           
           // Role-based record-level visibility
           if (currentRole === 'Employee') {
-            filteredData = filteredData.filter(b => b.employeeId === user?.id);
+            filteredData = filteredData.filter(b => b.employeeId === user?.employeeId);
           } else if (currentRole === 'Department Head' && user?.department) {
             filteredData = filteredData.filter(b => b.department === user.department);
           }
@@ -47,7 +47,7 @@ export const LeaveBalances: React.FC<LeaveBalancesProps> = ({ currentRole }) => 
     fetchBalances();
   }, [currentRole, user]);
 
-  const isHR = currentRole === 'HR Manager' || currentRole === 'System Admin';
+  const isHR = currentRole === 'HR Manager' || currentRole === 'Senior Manager';
 
   const columns = [
     { header: 'Employee No', accessor: 'employeeNo' as const, className: 'font-mono text-xs' },

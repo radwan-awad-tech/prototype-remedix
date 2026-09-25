@@ -20,7 +20,9 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeStatusTab, setActiveStatusTab] = useState<'Pending' | 'Approved' | 'Rejected'>('Pending');
-  const [activeRoleTab, setActiveRoleTab] = useState<'My' | 'Team' | 'All'>(currentRole === 'HR Manager' ? 'All' : currentRole === 'Department Head' ? 'Team' : 'My');
+  const [activeRoleTab, setActiveRoleTab] = useState<'My' | 'Team' | 'All'>(
+    currentRole === 'Department Head' ? 'Team' : ['Senior Manager', 'HR Manager', 'HR Officer', 'Payroll Officer'].includes(currentRole) ? 'All' : 'My'
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -46,8 +48,9 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
     fetchRequests();
   }, []);
 
-  const isHR = currentRole === 'HR Manager' || currentRole === 'HR Officer';
+  const isHR = ['Senior Manager', 'HR Manager', 'HR Officer'].includes(currentRole);
   const isDeptHead = currentRole === 'Department Head';
+  const canCreateRequest = !!currentUser.employeeId && ['Senior Manager', 'HR Manager', 'HR Officer', 'Department Head', 'Employee'].includes(currentRole);
 
   const filteredData = useMemo(() => {
     return requests.filter(req => {
@@ -128,20 +131,20 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
     }
   };
 
-  const canApprove = selectedRequest && (currentRole === 'HR Manager' || currentRole === 'Department Head') && selectedRequest.status === 'Pending' && selectedRequest.employeeId !== currentUser?.employeeId && selectedRequest.stage === (currentRole === 'Department Head' ? 'Manager' : 'HR');
+  const canApprove = selectedRequest && ['Senior Manager', 'HR Manager', 'Department Head'].includes(currentRole) && selectedRequest.status === 'Pending' && selectedRequest.employeeId !== currentUser?.employeeId && selectedRequest.stage === (currentRole === 'Department Head' ? 'Manager' : 'HR');
 
   const tableHeaderActions = (
     <div className="flex items-center gap-3">
-      <button 
+      {canCreateRequest && <button
         onClick={() => setIsFormOpen(true)}
         className="btn-gradient-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
       >
         <Plus className="w-4 h-4" />
         {t('new_leave_request')}
-      </button>
-      <button className="btn-secondary p-2">
+      </button>}
+      {['Senior Manager', 'HR Manager'].includes(currentRole) && <button className="btn-secondary p-2">
         <Download className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   );
 
@@ -149,13 +152,13 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Role Tabs */}
       <div className="flex items-center gap-1 p-1 bg-white border border-border-base rounded-xl w-fit shadow-sm">
-        <button 
+        {currentUser.employeeId && <button
           onClick={() => setActiveRoleTab('My')}
           className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${activeRoleTab === 'My' ? 'bg-bg-main text-brand-primary-end' : 'text-text-secondary hover:text-text-primary'}`}
         >
           {t('my_requests')}
-        </button>
-        {(isDeptHead || isHR) && (
+        </button>}
+        {(isDeptHead || isHR) && currentUser.employeeId && (
           <button 
             onClick={() => setActiveRoleTab('Team')}
             className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${activeRoleTab === 'Team' ? 'bg-bg-main text-brand-primary-end' : 'text-text-secondary hover:text-text-primary'}`}
@@ -163,7 +166,7 @@ export const LeaveRequests: React.FC<LeaveRequestsProps> = ({ currentRole, curre
             {t('team_requests')}
           </button>
         )}
-        {isHR && (
+        {(isHR || currentRole === 'Payroll Officer') && (
           <button 
             onClick={() => setActiveRoleTab('All')}
             className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${activeRoleTab === 'All' ? 'bg-bg-main text-brand-primary-end' : 'text-text-secondary hover:text-text-primary'}`}

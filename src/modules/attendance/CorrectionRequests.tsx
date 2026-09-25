@@ -38,7 +38,7 @@ export const CorrectionRequests: React.FC<CorrectionRequestsProps> = ({ userRole
           
           // Role-based record-level visibility
           if (userRole === 'Employee') {
-            filteredData = filteredData.filter(req => req.employeeId === user?.id);
+            filteredData = filteredData.filter(req => req.employeeId === user?.employeeId);
           }
           
           setCorrections(filteredData);
@@ -165,13 +165,13 @@ export const CorrectionRequests: React.FC<CorrectionRequestsProps> = ({ userRole
             </button>
           ))}
         </div>
-        <button 
+        {!!user?.employeeId && ['Senior Manager', 'HR Manager', 'HR Officer', 'Department Head', 'Employee'].includes(userRole) && <button
           onClick={() => setIsNewRequestDrawerOpen(true)}
           className="flex items-center gap-2 px-4 py-2 btn-gradient-primary rounded-lg shadow-sm text-sm font-medium"
         >
           <Plus size={18} />
           {t('new_request')}
-        </button>
+        </button>}
       </div>
 
       <DataTable
@@ -235,7 +235,7 @@ export const CorrectionRequests: React.FC<CorrectionRequestsProps> = ({ userRole
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         title={t('correction_request_details')}
-        footer={selectedRequest && selectedRequest.status === 'Pending' && (userRole === 'HR Manager' || userRole === 'Department Head') && (
+        footer={selectedRequest && selectedRequest.status === 'Pending' && ['Senior Manager', 'HR Manager', 'Department Head'].includes(userRole) && (
           <div className="flex gap-3 w-full">
             <button
               onClick={handleApprove}

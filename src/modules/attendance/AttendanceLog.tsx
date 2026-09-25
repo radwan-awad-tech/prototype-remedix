@@ -138,7 +138,7 @@ export const AttendanceLog: React.FC<AttendanceLogProps> = ({ userRole }) => {
             <Download size={18} />
             {t('export')}
           </button>
-          {userRole === 'HR Manager' && (
+          {['Senior Manager', 'HR Manager'].includes(userRole) && (
             <button 
               onClick={() => setIsManualEntryOpen(true)}
               className="flex items-center gap-2 px-4 py-2 btn-gradient-primary rounded-lg shadow-sm text-sm font-medium"

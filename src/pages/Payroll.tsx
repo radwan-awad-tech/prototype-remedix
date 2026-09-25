@@ -8,9 +8,11 @@ import { PayrollReview } from '../modules/payroll/PayrollReview';
 import { Payslips } from '../modules/payroll/Payslips';
 import { PayrollHistory } from '../modules/payroll/PayrollHistory';
 import { useAuth } from '../modules/auth/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 export const PayrollPage: React.FC = () => {
   const { user } = useAuth();
+  const { language } = useTranslation();
   const allTabs = [
     { id: 'settings', label: 'Payroll Settings', icon: <Settings className="w-4 h-4" />, translationKey: 'payroll_settings' as const },
     { id: 'run', label: 'Run Payroll', icon: <Play className="w-4 h-4" />, translationKey: 'process_payroll' as const },
@@ -21,14 +23,20 @@ export const PayrollPage: React.FC = () => {
 
   const tabs = allTabs.filter(tab => {
     const role = user?.role;
-    if (role === 'Employee' || role === 'Occupational Health Officer') return tab.id === 'payslips';
-    if (role === 'Department Head') return ['review', 'payslips'].includes(tab.id);
+    if (role === 'Employee') return tab.id === 'payslips';
     if (role === 'HR Officer' || role === 'Accountant') return ['review', 'history'].includes(tab.id);
     if (role === 'Payroll Officer') return tab.id !== 'review';
     return true; // Admin, Payroll Officer, Accountant, HR Manager
   });
 
   const [activeTab, setActiveTab] = useState(tabs[0]?.id || 'payslips');
+  const roleHeader = user?.role === 'Employee'
+    ? { title: language === 'ar' ? 'قسائمي' : 'My payslips', subtitle: language === 'ar' ? 'راجع كشوف الرواتب المتاحة لك.' : 'Review your available salary statements.' }
+    : user?.role === 'Accountant' || user?.role === 'HR Officer'
+      ? { title: language === 'ar' ? 'مراجعة الرواتب' : 'Payroll review', subtitle: language === 'ar' ? 'راجع دورات الرواتب وسجلّها ضمن صلاحيتك.' : 'Review payroll runs and history within your assigned role.' }
+      : user?.role === 'Payroll Officer'
+        ? { title: language === 'ar' ? 'إعداد الرواتب' : 'Payroll preparation', subtitle: language === 'ar' ? 'جهّز دورة الرواتب وأحِلها للمراجعة المستقلة.' : 'Prepare payroll runs for independent review.' }
+        : null;
 
   useEffect(() => {
     if (!tabs.find(t => t.id === activeTab)) {
@@ -59,10 +67,10 @@ export const PayrollPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader 
-        title="Payroll Management" 
-        titleKey="payroll_mgmt"
-        subtitle="Manage salary components, process payroll, and view payslips."
-        subtitleKey="payroll_subtitle"
+        title={roleHeader?.title || 'Payroll Management'}
+        titleKey={roleHeader ? undefined : 'payroll_mgmt'}
+        subtitle={roleHeader?.subtitle}
+        subtitleKey={roleHeader ? undefined : 'payroll_subtitle'}
       />
 
       <div className="card-base p-1 inline-flex bg-bg-main/50">

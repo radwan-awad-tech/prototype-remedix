@@ -152,9 +152,9 @@ const rawService = {
 };
 
 export const attendanceService = secureService('/attendance', rawService, {
-getTodayPunch: { roles: ['Employee'] }, clockIn: { roles: ['Employee'], validate: u => !!u.employeeId }, clockOut: { roles: ['Employee'], validate: u => !!u.employeeId },
+getTodayPunch: { roles: ['Senior Manager','HR Manager','HR Officer','Department Head','Payroll Officer','Employee'], validate: u => !!u.employeeId }, clockIn: { roles: ['Senior Manager','HR Manager','HR Officer','Department Head','Payroll Officer','Employee'], validate: u => !!u.employeeId }, clockOut: { roles: ['Senior Manager','HR Manager','HR Officer','Department Head','Payroll Officer','Employee'], validate: u => !!u.employeeId },
 listAttendanceRecords: {}, listAttendanceCorrections: {},
- createAttendanceCorrection: { roles: ['HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => !!u.employeeId && d.employeeId === u.employeeId },
+ createAttendanceCorrection: { roles: ['Senior Manager','HR Manager','HR Officer','Department Head','Employee'], target: d => d, validate: (u,d) => !!u.employeeId && d.employeeId === u.employeeId },
  approveCorrection: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },
  rejectCorrection: { roles: ['Senior Manager','HR Manager','Department Head'], target: id => corrections.find(r => r.id === id), validate: (u,id) => { const r = corrections.find(r => r.id === id); return !!r && r.status === 'Pending' && r.employeeId !== u.employeeId && (u.role === 'Department Head' ? r.stage === 'Manager' : r.stage === 'HR'); } },
  createAttendanceRecord: { roles: ['Senior Manager','HR Manager'] }, getAttendanceSummary: { roles: ['Senior Manager','HR Manager','HR Officer'] }

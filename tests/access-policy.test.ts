@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test, afterEach } from 'node:test';
-import { canAccessPath, ROLE_ORDER, withinScope } from '../src/modules/auth/permissions';
+import { canAccessPath, ROLE_ORDER, shouldUseScopedWorkspace, withinScope } from '../src/modules/auth/permissions';
 import { demoIdentity, setSessionActor } from '../src/modules/auth/session';
 import { employeeService } from '../src/services/employeeService';
 import { schedulingService } from '../src/services/schedulingService';
@@ -9,6 +9,7 @@ import { payrollService } from '../src/services/payrollService';
 import { occupationalHealthService } from '../src/services/occupationalHealthService';
 import { performanceService } from '../src/services/performanceService';
 import { dashboardService } from '../src/services/dashboardService';
+import { attendanceService } from '../src/services/attendanceService';
 import { reportService } from '../src/services/reportService';
 import { adminService } from '../src/services/adminService';
 import { RoleType } from '../src/types';
@@ -17,6 +18,20 @@ import { MOCK_ATTENDANCE } from '../src/mockData';
 function actor(role: RoleType, extra = {}) { const u = {...demoIdentity('Test', role), ...extra}; setSessionActor(u); return u; }
 afterEach(() => setSessionActor(null));
 
+test('staff demo identities can retrieve only their own punch state', async () => {
+  const storage = new Map<string, string>();
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
+    getItem: (key: string) => storage.get(key) ?? null,
+    setItem: (key: string, value: string) => storage.set(key, value),
+    removeItem: (key: string) => storage.delete(key),
+  }});
+  for (const role of ['Senior Manager','HR Manager','HR Officer','Department Head','Payroll Officer','Employee'] as RoleType[]) {
+    const u = actor(role);
+    assert.ok(u.employeeId, `${role} demo account should be associated with a staff record`);
+    assert.equal((await attendanceService.getTodayPunch()).success, true, `${role} can retrieve own punch status`);
+  }
+});
+
 test('all eight roles have a guide, unknown roles and routes fail closed', () => {
   for (const role of ROLE_ORDER) { assert.ok(canAccessPath(role, '/access')); assert.ok(canAccessPath(role, '/')); assert.equal(canAccessPath(role, '/unlisted'), false); }
   assert.equal(canAccessPath('Employee','/reports'),true);
@@ -24,6 +39,16 @@ test('all eight roles have a guide, unknown roles and routes fail closed', () =>
   assert.equal(canAccessPath('System Admin','/reports'),false);
   assert.equal(canAccessPath('unknown' as RoleType, '/admin'), false);
   assert.throws(() => demoIdentity('Test', 'unknown' as RoleType));
+});
+test('authorized staff roles use role-aware leave, attendance and payroll screens', () => {
+  for (const role of ['Senior Manager','HR Manager','HR Officer','Department Head','Payroll Officer','Accountant','Employee'] as RoleType[]) {
+    for (const path of ['/leaves','/attendance']) {
+      if (canAccessPath(role, path)) assert.equal(shouldUseScopedWorkspace(role, path), false, `${role} ${path}`);
+    }
+    if (canAccessPath(role, '/payroll')) assert.equal(shouldUseScopedWorkspace(role, '/payroll'), false, `${role} payroll`);
+  }
+  assert.equal(shouldUseScopedWorkspace('Department Head','/employees'), true);
+  assert.equal(shouldUseScopedWorkspace('HR Manager','/employees'), false);
 });
 test('technical administrator has no HR, salary or health routes/data', async () => {
   const u = actor('System Admin');
