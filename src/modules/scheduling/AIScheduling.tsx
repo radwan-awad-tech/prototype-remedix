@@ -186,14 +186,8 @@ export const AIScheduling: React.FC = () => {
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data.demand}>
-                    <defs>
-                      <linearGradient id="colorPatients" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#4ED1B2" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#4ED1B2" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5EAF2" />
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#DCE5EB" />
+                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: 'var(--color-text-secondary)', fontSize: 12}} dy={10} />
                     <YAxis hide />
                     <RechartsTooltip 
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
@@ -201,10 +195,10 @@ export const AIScheduling: React.FC = () => {
                     <Area 
                       type="monotone" 
                       dataKey="patients" 
-                      stroke="#4ED1B2" 
+                      stroke="#004D4D"
                       strokeWidth={3} 
                       fillOpacity={1} 
-                      fill="url(#colorPatients)" 
+                      fill="#E7F5F3"
                     />
                   </AreaChart>
                 </ResponsiveContainer>

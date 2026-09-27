@@ -43,7 +43,7 @@ export const PerformanceAnalytics: React.FC = () => {
 
   if (!analyticsData) return null;
 
-  const COLORS = ['var(--primary-gradient-end)', '#E5E7EB'];
+  const COLORS = ['var(--brand-deep-teal)', '#DCE5EB'];
 
   return (
     <div className="space-y-6">
@@ -95,11 +95,11 @@ export const PerformanceAnalytics: React.FC = () => {
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analyticsData.scoreDistribution}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#DCE5EB" />
                 <XAxis dataKey="range" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
                 <Tooltip 
-                  cursor={{ fill: '#F9FAFB' }}
+                  cursor={{ fill: '#F7F7F5' }}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Bar dataKey="count" radius={[4, 4, 0, 0]}>
@@ -118,13 +118,13 @@ export const PerformanceAnalytics: React.FC = () => {
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analyticsData.deptAverages} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F3F4F6" />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#DCE5EB" />
                 <XAxis type="number" domain={[0, 5]} axisLine={false} tickLine={false} orientation={isRTL ? "top" : "bottom"} />
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={80} orientation={isRTL ? "right" : "left"} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
-                <Bar dataKey="score" fill="var(--primary-gradient-end)" radius={isRTL ? [4, 0, 0, 4] : [0, 4, 4, 0]} barSize={20} />
+                <Bar dataKey="score" fill="var(--brand-digital-teal)" radius={isRTL ? [4, 0, 0, 4] : [0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -88,8 +88,8 @@ export const IncidentDrawer: React.FC<IncidentDrawerProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-white border border-border-main flex items-center justify-center shadow-sm">
               <ShieldAlert className={`w-6 h-6 ${
-                incident.severity === 'Critical' ? 'text-rose-500' : 
-                incident.severity === 'High' ? 'text-orange-500' : 'text-blue-500'
+                incident.severity === 'Critical' ? 'text-rose-700' :
+                incident.severity === 'High' ? 'text-brand-deep-teal' : 'text-text-secondary'
               }`} />
             </div>
             <div>
@@ -100,11 +100,13 @@ export const IncidentDrawer: React.FC<IncidentDrawerProps> = ({
           <div className="flex flex-col items-end gap-2">
             <StatusBadge label={incident.status} type={
               incident.status === 'Closed' ? 'slate' : 
-              incident.status === 'Resolved' ? 'emerald' : 'blue'
+              incident.status === 'Resolved' ? 'emerald' :
+              incident.status === 'Under Investigation' ? 'amber' : 'blue'
             } />
             <StatusBadge label={incident.severity} type={
-              incident.severity === 'Critical' ? 'rose' : 
-              incident.severity === 'High' ? 'orange' : 'blue'
+              incident.severity === 'Critical' ? 'rose' :
+              incident.severity === 'High' ? 'orange' :
+              incident.severity === 'Medium' ? 'amber' : 'blue'
             } />
           </div>
         </div>

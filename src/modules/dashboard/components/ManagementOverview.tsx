@@ -34,9 +34,9 @@ interface ManagementOverviewProps {
   user: User | null;
 }
 
-const CHART_COLORS = ['#004D4D', '#14B8A6', '#6BA5A5', '#DCE5EB', '#111827'];
+const CHART_COLORS = ['#004D4D', '#14B8A6', 'rgba(17,24,39,0.68)', '#DCE5EB', '#111827'];
 const tooltipStyle = {
-  backgroundColor: '#FFFFFF',
+  backgroundColor: '#F7F7F5',
   border: '1px solid #DCE5EB',
   borderRadius: 12,
   boxShadow: '0 10px 30px rgba(17, 24, 39, 0.08)',
@@ -174,8 +174,8 @@ export const ManagementOverview: React.FC<ManagementOverviewProps> = ({ stats, c
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={attendanceTrend} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
                 <CartesianGrid stroke="#DCE5EB" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="day" tick={{ fill: '#52616B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 100]} tick={{ fill: '#52616B', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value}%`} />
+                <XAxis dataKey="day" tick={{ fill: 'var(--color-text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[0, 100]} tick={{ fill: 'var(--color-text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(value) => `${value}%`} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value}%`, translate('attendance')]} />
                 <Line type="monotone" dataKey="rate" stroke="#004D4D" strokeWidth={3} dot={{ r: 4, fill: '#14B8A6', stroke: '#004D4D', strokeWidth: 2 }} activeDot={{ r: 6 }} />
               </LineChart>
@@ -188,8 +188,8 @@ export const ManagementOverview: React.FC<ManagementOverviewProps> = ({ stats, c
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={attendanceByDepartment} layout="vertical" margin={{ top: 4, right: 12, left: 12, bottom: 0 }}>
                 <CartesianGrid stroke="#DCE5EB" strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={92} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 10 }} />
+                <XAxis type="number" allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-secondary)', fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={92} axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-secondary)', fontSize: 10 }} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Bar dataKey="onTime" name={translate('present')} stackId="attendance" fill="#004D4D" />
                 <Bar dataKey="late" name={translate('late')} stackId="attendance" fill="#14B8A6" />
@@ -224,8 +224,8 @@ export const ManagementOverview: React.FC<ManagementOverviewProps> = ({ stats, c
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={leaveStatus} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid stroke="#DCE5EB" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 10 }} />
-                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 10 }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-secondary)', fontSize: 10 }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-secondary)', fontSize: 10 }} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Bar dataKey="value" fill="#14B8A6" radius={[6, 6, 0, 0]} />
               </BarChart>
@@ -265,8 +265,8 @@ export const ManagementOverview: React.FC<ManagementOverviewProps> = ({ stats, c
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={recruitmentFunnel} layout="vertical" margin={{ top: 5, right: 16, left: 16, bottom: 0 }}>
                 <CartesianGrid stroke="#DCE5EB" strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={84} axisLine={false} tickLine={false} tick={{ fill: '#52616B', fontSize: 10 }} />
+                <XAxis type="number" allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-secondary)', fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={84} axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-secondary)', fontSize: 10 }} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Bar dataKey="value" fill="#004D4D" radius={[0, 6, 6, 0]} />
               </BarChart>

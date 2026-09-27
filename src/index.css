@@ -26,13 +26,102 @@
   --color-brand-digital-teal: var(--brand-digital-teal);
   --color-brand-muted-teal: var(--brand-muted-teal);
   --color-brand-light-gray: var(--brand-light-gray);
-  --color-brand-secondary-start: #0F766E;
-  --color-brand-secondary-end: #2DD4BF;
+  --color-brand-secondary-start: var(--brand-deep-teal);
+  --color-brand-secondary-end: var(--brand-digital-teal);
   
   --color-bg-main: var(--brand-off-white);
   --color-border-base: var(--brand-light-gray);
   --color-text-primary: var(--brand-black);
-  --color-text-secondary: #52616B;
+  --color-text-secondary: rgba(17, 24, 39, 0.68);
+
+  /* Re-map legacy utility palettes to the REMEDIX brand across every screen. */
+  --color-gray-50: var(--brand-off-white);
+  --color-gray-100: var(--brand-off-white);
+  --color-gray-200: var(--brand-light-gray);
+  --color-gray-300: var(--brand-light-gray);
+  --color-gray-400: rgba(17, 24, 39, 0.68);
+  --color-gray-500: rgba(17, 24, 39, 0.68);
+  --color-gray-600: rgba(17, 24, 39, 0.68);
+  --color-gray-700: var(--brand-black);
+  --color-gray-900: var(--brand-black);
+  --color-slate-50: var(--brand-off-white);
+  --color-slate-100: var(--brand-off-white);
+  --color-slate-200: var(--brand-light-gray);
+  --color-slate-300: var(--brand-light-gray);
+  --color-slate-400: rgba(17, 24, 39, 0.68);
+  --color-slate-500: rgba(17, 24, 39, 0.68);
+  --color-slate-600: rgba(17, 24, 39, 0.68);
+  --color-slate-700: var(--brand-black);
+  --color-slate-800: var(--brand-black);
+  --color-slate-900: var(--brand-black);
+
+  --color-blue-50: var(--brand-off-white);
+  --color-blue-100: var(--brand-muted-teal);
+  --color-blue-200: var(--brand-light-gray);
+  --color-blue-500: var(--brand-deep-teal);
+  --color-blue-600: var(--brand-deep-teal);
+  --color-blue-700: var(--brand-deep-teal);
+  --color-blue-800: var(--brand-black);
+  --color-green-50: var(--brand-off-white);
+  --color-green-100: var(--brand-muted-teal);
+  --color-green-500: var(--brand-deep-teal);
+  --color-green-600: var(--brand-deep-teal);
+  --color-green-700: var(--brand-deep-teal);
+  --color-emerald-50: var(--brand-off-white);
+  --color-emerald-100: var(--brand-muted-teal);
+  --color-emerald-200: var(--brand-light-gray);
+  --color-emerald-400: var(--brand-digital-teal);
+  --color-emerald-500: var(--brand-deep-teal);
+  --color-emerald-600: var(--brand-deep-teal);
+  --color-emerald-700: var(--brand-deep-teal);
+  --color-emerald-800: var(--brand-black);
+  --color-emerald-900: var(--brand-black);
+  --color-teal-100: var(--brand-muted-teal);
+  --color-teal-200: var(--brand-light-gray);
+  --color-teal-700: var(--brand-deep-teal);
+  --color-indigo-100: var(--brand-muted-teal);
+  --color-indigo-200: var(--brand-light-gray);
+  --color-indigo-700: var(--brand-deep-teal);
+  --color-purple-50: var(--brand-off-white);
+  --color-purple-100: var(--brand-muted-teal);
+  --color-purple-200: var(--brand-light-gray);
+  --color-purple-500: var(--brand-deep-teal);
+  --color-purple-600: var(--brand-deep-teal);
+  --color-purple-700: var(--brand-deep-teal);
+
+  --color-amber-50: var(--brand-off-white);
+  --color-amber-100: var(--brand-muted-teal);
+  --color-amber-200: var(--brand-light-gray);
+  --color-amber-500: var(--brand-deep-teal);
+  --color-amber-600: var(--brand-deep-teal);
+  --color-amber-700: var(--brand-deep-teal);
+  --color-amber-800: var(--brand-black);
+  --color-amber-900: var(--brand-black);
+  --color-amber-950: var(--brand-black);
+  --color-orange-50: var(--brand-off-white);
+  --color-orange-100: var(--brand-light-gray);
+  --color-orange-200: var(--brand-light-gray);
+  --color-orange-500: var(--brand-deep-teal);
+  --color-orange-600: var(--brand-deep-teal);
+  --color-orange-700: var(--brand-deep-teal);
+  --color-orange-900: var(--brand-black);
+  --color-yellow-400: var(--brand-digital-teal);
+
+  /* Restrained danger tones remain reserved for errors and urgent safety states. */
+  --color-red-50: var(--brand-off-white);
+  --color-red-100: var(--brand-off-white);
+  --color-red-200: var(--brand-light-gray);
+  --color-red-500: #9F2D3F;
+  --color-red-600: #8A2434;
+  --color-red-700: #701A2B;
+  --color-rose-50: var(--brand-off-white);
+  --color-rose-100: var(--brand-off-white);
+  --color-rose-200: var(--brand-light-gray);
+  --color-rose-500: #9F2D3F;
+  --color-rose-600: #8A2434;
+  --color-rose-700: #701A2B;
+  --color-rose-800: #5A1524;
+  --color-rose-900: #421019;
 
   --background-image-gradient-primary: none;
   --background-image-gradient-secondary: none;
@@ -138,6 +227,37 @@
 
   .brand-eyebrow {
     @apply text-xs font-semibold uppercase tracking-[0.18em] text-brand-digital-teal;
+  }
+
+  .brand-status-neutral {
+    background: var(--brand-off-white);
+    color: var(--brand-black);
+    border-color: var(--brand-light-gray);
+  }
+
+  .brand-status-soft {
+    background: var(--brand-muted-teal);
+    color: var(--brand-deep-teal);
+    border-color: var(--brand-light-gray);
+  }
+
+  .brand-status-attention {
+    background: var(--brand-light-gray);
+    color: var(--brand-black);
+    border-color: var(--brand-light-gray);
+  }
+
+  .brand-status-strong {
+    background: var(--brand-deep-teal);
+    color: var(--brand-off-white);
+    border-color: var(--brand-deep-teal);
+  }
+
+  .brand-status-critical {
+    background: var(--brand-off-white);
+    color: #701A2B;
+    border-color: var(--brand-light-gray);
+    font-weight: 700;
   }
 }
 

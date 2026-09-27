@@ -131,13 +131,13 @@ export const AlertsCenter: React.FC<AlertsCenterProps> = ({ department: filterDe
               key={alert.id} 
               onClick={() => handleAlertClick(alert)}
               className={`card-base p-4 flex items-start gap-4 transition-all hover:shadow-md cursor-pointer border-s-4 ${
-                alert.severity === 'High' ? 'border-s-rose-500' : 
-                alert.severity === 'Medium' ? 'border-s-amber-500' : 'border-s-blue-500'
+                alert.severity === 'High' ? 'border-s-brand-deep-teal' :
+                alert.severity === 'Medium' ? 'border-s-brand-light-gray' : 'border-s-brand-digital-teal'
               } ${alert.isSeen ? 'opacity-60' : 'opacity-100'}`}
             >
               <div className={`p-2 rounded-lg ${
-                alert.severity === 'High' ? 'bg-rose-50 text-rose-600' : 
-                alert.severity === 'Medium' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
+                alert.severity === 'High' ? 'brand-status-strong' :
+                alert.severity === 'Medium' ? 'brand-status-attention' : 'brand-status-soft'
               }`}>
                 <AlertCircle className="w-5 h-5" />
               </div>
@@ -145,8 +145,8 @@ export const AlertsCenter: React.FC<AlertsCenterProps> = ({ department: filterDe
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-text-secondary">{t(getAlertTypeKey(alert.type))}</span>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
-                    alert.severity === 'High' ? 'bg-rose-100 text-rose-700' : 
-                    alert.severity === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'
+                    alert.severity === 'High' ? 'brand-status-strong' :
+                    alert.severity === 'Medium' ? 'brand-status-attention' : 'brand-status-soft'
                   }`}>
                     {t(getSeverityKey(alert.severity))}
                   </span>

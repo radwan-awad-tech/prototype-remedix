@@ -63,10 +63,10 @@ const rawService = {
     // In a real app, these would be filtered by department in the database
     const data = {
       scoreDistribution: [
-        { range: '1-2', count: 2, color: '#EF4444' },
-        { range: '2-3', count: 5, color: '#F59E0B' },
-        { range: '3-4', count: 18, color: 'var(--primary-gradient-end)' },
-        { range: '4-5', count: 12, color: '#10B981' },
+        { range: '1-2', count: 2, color: '#111827' },
+        { range: '2-3', count: 5, color: 'rgba(17,24,39,0.68)' },
+        { range: '3-4', count: 18, color: '#14B8A6' },
+        { range: '4-5', count: 12, color: '#004D4D' },
       ],
       deptAverages: department ? [
         { name: department, score: 4.2 }

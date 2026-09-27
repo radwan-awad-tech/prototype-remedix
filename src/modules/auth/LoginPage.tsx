@@ -227,7 +227,7 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-brand-deep-teal hover:bg-[#003B3B] text-white rounded-xl py-2.5 flex items-center justify-center gap-2 shadow-md shadow-brand-deep-teal/20 transition-colors disabled:opacity-70"
+                    className="w-full bg-brand-deep-teal hover:brightness-90 text-white rounded-xl py-2.5 flex items-center justify-center gap-2 shadow-md shadow-brand-deep-teal/20 transition-all disabled:opacity-70"
                   >
                     {isSubmitting ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -265,7 +265,7 @@ export const LoginPage: React.FC = () => {
                         setIsResetSent(false);
                         setResetEmail('');
                       }}
-                      className="w-full bg-brand-deep-teal hover:bg-[#003B3B] text-white rounded-xl py-2.5 transition-colors"
+                      className="w-full bg-brand-deep-teal hover:brightness-90 text-white rounded-xl py-2.5 transition-all"
                     >
                       {t('back_to_login')}
                     </button>
@@ -300,7 +300,7 @@ export const LoginPage: React.FC = () => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-brand-deep-teal hover:bg-[#003B3B] text-white rounded-xl py-2.5 flex items-center justify-center gap-2 shadow-md shadow-brand-deep-teal/20 transition-colors disabled:opacity-70"
+                      className="w-full bg-brand-deep-teal hover:brightness-90 text-white rounded-xl py-2.5 flex items-center justify-center gap-2 shadow-md shadow-brand-deep-teal/20 transition-all disabled:opacity-70"
                     >
                       {isSubmitting ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
