@@ -51,6 +51,7 @@
 
   /* Keep the branded pointer consistent; utility classes such as cursor-pointer
      must not silently replace it with the browser default. */
+  html,
   body,
   body * {
     cursor: url('/brand/remedix-cursor.svg') 3 2, auto !important;
@@ -76,8 +77,9 @@
   button,
   a,
   select,
-  [role='button'] {
-    cursor: url('/brand/remedix-cursor-hand.svg') 10 3, pointer !important;
+  [role='button'],
+  .cursor-pointer {
+    cursor: url('/brand/remedix-cursor-hand.svg') 6 2, pointer !important;
   }
 
   input,
